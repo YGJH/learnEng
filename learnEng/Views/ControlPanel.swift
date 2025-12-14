@@ -38,11 +38,12 @@ struct ControlPanel: View {
                         .foregroundStyle(selectedPage == choice ? .blue : .orange)
                         .background(selectedPage == choice ? Color.blue.opacity(0.1) : Color.clear)
                 }
+                .disabled(!showPanel) // Only allow interaction when panel is visible
             }
-//            Spacer()
         }
         .padding(.top, 20)
         .background(Color(UIColor.systemBackground))
-//        .edgesIgnoringSafeArea(.all)
+        .ignoresSafeArea()
+        .allowsHitTesting(showPanel) // Disable all interactions when panel is hidden
     }
 }

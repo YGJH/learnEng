@@ -6,9 +6,9 @@ struct SettingsView: View {
     
     let models = [
         "local": "Local Model (On-Device)",
-        "gemini-1.5-flash": "Gemini 1.5 Flash",
-        "gemini-1.5-pro": "Gemini 1.5 Pro",
-        "gemini-2.0-flash-exp": "Gemini 2.0 Flash (Experimental)"
+        "gemini-2.5-flash": "Gemini 2.5 Flash",
+        "gemini-2.5-flash-lite": "Gemini 2.5 Flash Lite",
+        "gemini-3-pro-preview": "Gemini 3 Pro Preview"
     ]
     
     var body: some View {
@@ -38,6 +38,19 @@ struct SettingsView: View {
                 }
             }
             .navigationTitle("Settings")
+            .onAppear {
+                // Migration for old model IDs or user manual errors
+                if selectedModel.hasPrefix("models/") {
+                    selectedModel = String(selectedModel.dropFirst(7))
+                }
+                
+                // Migration for old model IDs
+                if selectedModel == "gemini-1.5-flash" {
+                    selectedModel = "gemini-1.5-flash-latest"
+                } else if selectedModel == "gemini-1.5-pro" {
+                    selectedModel = "gemini-1.5-pro-latest"
+                }
+            }
         }
     }
 }

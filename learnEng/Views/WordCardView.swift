@@ -60,10 +60,24 @@ struct WordCardView: View {
                 Spacer()
                 
                 Button(action: saveCard) {
-                    Image(systemName: isSaved ? "checkmark.circle.fill" : "plus.circle.fill")
-                        .font(.title2)
-                        .foregroundStyle(isSaved ? .green : .blue)
-                        .background(Color.white.clipShape(Circle()))
+                    HStack(spacing: 6) {
+                        Image(systemName: isSaved ? "checkmark.circle.fill" : "plus.circle.fill")
+                            .font(.title3)
+                        if isSaved {
+                            Text("Saved")
+                                .font(.callout)
+                                .fontWeight(.semibold)
+                        } else {
+                            Text("Save")
+                                .font(.callout)
+                                .fontWeight(.semibold)
+                        }
+                    }
+                    .foregroundStyle(isSaved ? .green : .white)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 10)
+                    .background(isSaved ? Color.green.opacity(0.15) : Color.blue)
+                    .clipShape(Capsule())
                 }
                 .disabled(isSaved)
             }

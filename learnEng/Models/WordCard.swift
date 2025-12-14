@@ -1,6 +1,8 @@
 import Foundation
+import FoundationModels
 
-struct WordCard: Decodable {
+@Generable
+struct WordCard: Codable {
     let word: String?
     let ipa: String?
     let part_of_speech: String?

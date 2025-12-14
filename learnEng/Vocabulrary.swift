@@ -10,30 +10,36 @@ struct VocabulraryView: View {
         NavigationStack {
             List {
                 ForEach(items) { item in
-                    VocabularyCard(item: item)
-                        .listRowSeparator(.hidden)
-                        .listRowBackground(Color.clear)
-                        .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
-                        .onTapGesture {
-                            selectedItem = item
+                    Button {
+                        selectedItem = item
+                    } label: {
+                        VocabularyCard(item: item)
+                    }
+                    .buttonStyle(.plain)
+                    .listRowSeparator(.hidden)
+                    .listRowBackground(Color.clear)
+                    .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
+                    .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                        Button(role: .destructive) {
+                            deleteItem(item)
+                        } label: {
+                            Label("Delete", systemImage: "trash")
                         }
+                    }
                 }
-                .onDelete(perform: deleteItems)
             }
             .listStyle(.plain)
             .navigationTitle("Vocabulary")
             .background(Color(.systemGroupedBackground))
-            .sheet(item: $selectedItem) { item in
+            .fullScreenCover(item: $selectedItem) { item in
                 VocabularyDetailView(item: item)
             }
         }
     }
 
-    private func deleteItems(offsets: IndexSet) {
+    private func deleteItem(_ item: Item) {
         withAnimation {
-            for index in offsets {
-                modelContext.delete(items[index])
-            }
+            modelContext.delete(item)
         }
     }
 }
@@ -154,6 +160,8 @@ struct BadgeView: View {
 struct VocabularyDetailView: View {
     let item: Item
     @Environment(\.dismiss) var dismiss
+    @Environment(\.modelContext) private var modelContext
+    @State private var showDeleteAlert = false
     
     var body: some View {
         NavigationStack {
@@ -265,6 +273,23 @@ struct VocabularyDetailView: View {
                             Text(extra)
                         }
                     }
+                    
+                    // Delete button at bottom
+                    Button(role: .destructive) {
+                        showDeleteAlert = true
+                    } label: {
+                        HStack {
+                            Image(systemName: "trash.fill")
+                            Text("Delete Word")
+                                .fontWeight(.semibold)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.red.opacity(0.1))
+                        .foregroundStyle(.red)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                    }
+                    .padding(.top, 20)
                 }
                 .padding(24)
             }
@@ -276,6 +301,15 @@ struct VocabularyDetailView: View {
                         dismiss()
                     }
                 }
+            }
+            .alert("Delete Word", isPresented: $showDeleteAlert) {
+                Button("Cancel", role: .cancel) { }
+                Button("Delete", role: .destructive) {
+                    modelContext.delete(item)
+                    dismiss()
+                }
+            } message: {
+                Text("Are you sure you want to delete '\(item.word ?? item.query)'?")
             }
         }
     }

@@ -13,7 +13,7 @@ import FoundationModels
 struct ContentView: View {
     @State var user_input = ""
     let model = SystemLanguageModel.default
-    @State private var model_session = LanguageModelSession()
+    @State private var model_session = LanguageModelSession(tools: [DictionaryTool()])
     @State private var chattingSession: [ChatMessage] = []
     @State private var currentTask: Task<Void, Never>?
     @State var state_img: Image = Image(systemName: "paperplane.fill")
@@ -24,6 +24,7 @@ struct ContentView: View {
     @State var selectedPage: String = "Chat"
     
     @State private var showMissingKeyAlert = false
+    @State private var showQuotaAlert = false
     @AppStorage("geminiApiKey") private var geminiApiKey: String = ""
     @AppStorage("selectedModel") private var selectedModel: String = "local"
     
@@ -65,6 +66,18 @@ struct ContentView: View {
                         waiting_model_reply = false
                         state_img = Image(systemName: "paperplane.fill")
                         showMissingKeyAlert = true
+                        // Restore input
+                        user_input = query
+                        // Remove the failed message bubble
+                        if let index = chattingSession.firstIndex(where: { $0.id == newMessage.id }) {
+                            chattingSession.remove(at: index)
+                        }
+                    }
+                } catch LLMError.quotaExceeded {
+                    await MainActor.run {
+                        waiting_model_reply = false
+                        state_img = Image(systemName: "paperplane.fill")
+                        showQuotaAlert = true
                         // Restore input
                         user_input = query
                         // Remove the failed message bubble
@@ -263,6 +276,20 @@ struct ContentView: View {
             Button("Cancel", role: .cancel) { }
         } message: {
             Text("Please enter your Gemini API Key or switch to the local model.")
+        }
+        .alert("API Quota Exceeded", isPresented: $showQuotaAlert) {
+            Button("Use Local Model") {
+                selectedModel = "local"
+                sendMessage()
+            }
+            Button("Open Billing Page") {
+                if let url = URL(string: "https://aistudio.google.com/apikey") {
+                    UIApplication.shared.open(url)
+                }
+            }
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text("You exceeded your current quota, please check your plan and billing details at Google AI Studio.")
         }
     }
     
