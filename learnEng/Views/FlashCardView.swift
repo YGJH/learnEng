@@ -324,18 +324,17 @@ struct FlashCardView: View {
         let currentCard = cards[currentIndex]
         forgottenCards.append(currentCard)
         
-        // Insert the card back randomly between 5-10 positions later
+        // 先從當前位置移除這張卡
+        cards.remove(at: currentIndex)
+        
+        // 計算要插入的位置（在當前位置後 5-10 張卡之間）
+        // 因為已經移除了當前卡，所以不需要 +1
         let insertPosition = min(currentIndex + Int.random(in: 5...10), cards.count)
         
-        // Move to next card
-        currentIndex += 1
+        // 把忘記的卡片插入到後面
+        cards.insert(currentCard, at: insertPosition)
         
-        // Insert forgotten card back
-        if insertPosition < cards.count {
-            cards.insert(currentCard, at: insertPosition)
-        } else {
-            cards.append(currentCard)
-        }
+        // 不需要 currentIndex += 1，因為移除後下一張卡自動變成當前位置
         
         resetCardState()
         checkCompletion()
