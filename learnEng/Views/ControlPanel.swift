@@ -19,7 +19,7 @@ struct ControlPanel: View {
                 Image(systemName: "list.dash")
                     .font(.system(size: 30))
             }
-            .padding()
+            .padding(20)
             .opacity(0)
 
 

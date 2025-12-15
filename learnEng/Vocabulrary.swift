@@ -90,14 +90,14 @@ struct VocabularyCard: View {
                 }
             }
             
-            if let meaningZh = item.meaning_zh {
+            if let translation = item.translation {
                 HStack(alignment: .top, spacing: 8) {
-                    Image(systemName: "character.book.closed.zh")
+                    Image(systemName: "globe")
                         .foregroundStyle(.red)
                         .font(.caption)
                         .padding(.top, 2)
                     
-                    Text(meaningZh)
+                    Text(translation)
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                         .lineLimit(2)
@@ -202,9 +202,9 @@ struct VocabularyDetailView: View {
                         }
                     }
                     
-                    if let meaningZh = item.meaning_zh {
-                        DetailSection(icon: "character.book.closed.zh", title: "DEFINITION (ZH)", color: .red) {
-                            Text(meaningZh)
+                    if let translation = item.translation {
+                        DetailSection(icon: "globe", title: "TRANSLATION", color: .red) {
+                            Text(translation)
                                 .font(.body)
                                 .lineSpacing(6)
                         }

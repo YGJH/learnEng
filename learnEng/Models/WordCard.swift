@@ -7,7 +7,7 @@ struct WordCard: Codable {
     let ipa: String?
     let part_of_speech: String?
     let meaning_en: String?
-    let meaning_zh: String?
+    let translation: String?
     let examples: [String]?
     let word_family: [String]?
     let collocations: [String]?
@@ -19,7 +19,7 @@ struct WordCard: Codable {
         case ipa
         case part_of_speech
         case meaning_en
-        case meaning_zh
+        case translation = "meaning_zh"  // Keep JSON key for backward compatibility
         case examples
         case word_family
         case collocations
@@ -34,7 +34,7 @@ struct WordCard: Codable {
         ipa = try? container.decodeIfPresent(String.self, forKey: .ipa)
         part_of_speech = try? container.decodeIfPresent(String.self, forKey: .part_of_speech)
         meaning_en = try? container.decodeIfPresent(String.self, forKey: .meaning_en)
-        meaning_zh = try? container.decodeIfPresent(String.self, forKey: .meaning_zh)
+        translation = try? container.decodeIfPresent(String.self, forKey: .translation)
         examples = try? container.decodeIfPresent([String].self, forKey: .examples)
         word_family = try? container.decodeIfPresent([String].self, forKey: .word_family)
         collocations = try? container.decodeIfPresent([String].self, forKey: .collocations)
@@ -42,12 +42,12 @@ struct WordCard: Codable {
         extra_content = try? container.decodeIfPresent(String.self, forKey: .extra_content)
     }
     
-    init(word: String? = nil, ipa: String? = nil, part_of_speech: String? = nil, meaning_en: String? = nil, meaning_zh: String? = nil, examples: [String]? = nil, word_family: [String]? = nil, collocations: [String]? = nil, nuance: String? = nil, extra_content: String? = nil) {
+    init(word: String? = nil, ipa: String? = nil, part_of_speech: String? = nil, meaning_en: String? = nil, translation: String? = nil, examples: [String]? = nil, word_family: [String]? = nil, collocations: [String]? = nil, nuance: String? = nil, extra_content: String? = nil) {
         self.word = word
         self.ipa = ipa
         self.part_of_speech = part_of_speech
         self.meaning_en = meaning_en
-        self.meaning_zh = meaning_zh
+        self.translation = translation
         self.examples = examples
         self.word_family = word_family
         self.collocations = collocations

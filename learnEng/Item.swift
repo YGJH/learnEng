@@ -16,21 +16,21 @@ final class Item {
     var ipa: String?
     var part_of_speech: String?
     var meaning_en: String?
-    var meaning_zh: String?
+    var translation: String?
     var examples: [String]?
     var word_family: [String]?
     var collocations: [String]?
     var nuance: String?
     var extra_content: String?
     
-    init(timestamp: Date = Date(), query: String = "", word: String? = nil, ipa: String? = nil, part_of_speech: String? = nil, meaning_en: String? = nil, meaning_zh: String? = nil, examples: [String]? = nil, word_family: [String]? = nil, collocations: [String]? = nil, nuance: String? = nil, extra_content: String? = nil) {
+    init(timestamp: Date = Date(), query: String = "", word: String? = nil, ipa: String? = nil, part_of_speech: String? = nil, meaning_en: String? = nil, translation: String? = nil, examples: [String]? = nil, word_family: [String]? = nil, collocations: [String]? = nil, nuance: String? = nil, extra_content: String? = nil) {
         self.timestamp = timestamp
         self.query = query
         self.word = word
         self.ipa = ipa
         self.part_of_speech = part_of_speech
         self.meaning_en = meaning_en
-        self.meaning_zh = meaning_zh
+        self.translation = translation
         self.examples = examples
         self.word_family = word_family
         self.collocations = collocations

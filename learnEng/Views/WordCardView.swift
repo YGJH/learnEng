@@ -14,7 +14,7 @@ struct WordCardView: View {
             ipa: card.ipa,
             part_of_speech: card.part_of_speech,
             meaning_en: card.meaning_en,
-            meaning_zh: card.meaning_zh,
+            translation: card.translation,
             examples: card.examples,
             word_family: card.word_family,
             collocations: card.collocations,
@@ -97,13 +97,13 @@ struct WordCardView: View {
                 }
             }
             
-            if let meaningZh = card.meaning_zh {
+            if let translation = card.translation {
                 VStack(alignment: .leading, spacing: 8) {
-                    Label("Definition (ZH)", systemImage: "character.book.closed.zh")
+                    Label("Translation", systemImage: "globe")
                         .font(.caption)
                         .fontWeight(.bold)
                         .foregroundStyle(.secondary)
-                    Text(meaningZh)
+                    Text(translation)
                         .font(.body)
                         .foregroundStyle(.primary)
                 }

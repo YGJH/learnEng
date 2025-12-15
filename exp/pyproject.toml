@@ -5,6 +5,9 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "fastapi>=0.124.4",
+    "feedparser>=6.0.12",
     "google>=3.0.0",
     "google-genai>=1.55.0",
+    "uvicorn>=0.38.0",
 ]

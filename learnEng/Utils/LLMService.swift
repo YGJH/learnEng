@@ -25,7 +25,30 @@ enum LLMError: Error, LocalizedError {
     }
 }
 
-let SystemPrompt = """
+func getSystemPrompt() -> String {
+    let translationLanguage = UserDefaults.standard.string(forKey: "translationLanguage") ?? "zh-TW"
+    
+    let languageNames: [String: String] = [
+        "zh-TW": "Traditional Chinese (繁體中文)",
+        "zh-CN": "Simplified Chinese (简体中文)",
+        "ja": "Japanese (日本語)",
+        "ko": "Korean (한국어)",
+        "es": "Spanish (Español)",
+        "fr": "French (Français)",
+        "de": "German (Deutsch)",
+        "it": "Italian (Italiano)",
+        "pt": "Portuguese (Português)",
+        "ru": "Russian (Русский)",
+        "ar": "Arabic (العربية)",
+        "hi": "Hindi (हिन्दी)",
+        "vi": "Vietnamese (Tiếng Việt)",
+        "th": "Thai (ไทย)",
+        "id": "Indonesian (Bahasa Indonesia)"
+    ]
+    
+    let languageName = languageNames[translationLanguage] ?? translationLanguage
+    
+    return """
 System:
 You are a professional and helpful English Teacher specialized in vocabulary education.
 Your goal is to help users learn English words with accurate definitions, pronunciations, and usage examples.
@@ -39,7 +62,7 @@ Generate a structured vocabulary card for the word the user asks about. You must
 2. **ipa**: IPA pronunciation notation (e.g., "/ˈtæŋ.ɡəl/")
 3. **part_of_speech**: The primary part of speech (e.g., "noun", "verb", "adjective", "adverb")
 4. **meaning_en**: A clear, concise English definition
-5. **meaning_zh**: Traditional Chinese translation (繁體中文翻譯)
+5. **translation**: Translation in \(languageName)
 6. **examples**: An array of 2-3 example sentences showing the word in different contexts
 7. **word_family**: Related forms (e.g., for "happy" → ["happiness", "happily", "unhappy"])
 8. **collocations**: Common phrases or collocations (e.g., for "make" → ["make a decision", "make sense"])
@@ -52,6 +75,45 @@ Generate a structured vocabulary card for the word the user asks about. You must
 
 user query: 
 """
+}
+
+func getGeminiSystemPrompt() -> String {
+    let translationLanguage = UserDefaults.standard.string(forKey: "translationLanguage") ?? "zh-TW"
+    let languageNames: [String: String] = [
+        "zh-TW": "Traditional Chinese",
+        "zh-CN": "Simplified Chinese",
+        "ja": "Japanese",
+        "ko": "Korean",
+        "es": "Spanish",
+        "fr": "French",
+        "de": "German",
+        "it": "Italian",
+        "pt": "Portuguese",
+        "ru": "Russian",
+        "ar": "Arabic",
+        "hi": "Hindi",
+        "vi": "Vietnamese",
+        "th": "Thai",
+        "id": "Indonesian"
+    ]
+    let languageName = languageNames[translationLanguage] ?? translationLanguage
+    
+    return """
+struct WordCard: Codable {
+    let word: String?
+    let ipa: String?
+    let part_of_speech: String?
+    let meaning_en: String?
+    let meaning_zh: String?  // Translation in \(languageName)
+    let examples: [String]?
+    let word_family: [String]?
+    let collocations: [String]?
+    let nuance: String?
+    let extra_content: String?
+}            
+
+"""
+}
 
 // MARK: - Model Abstraction
 
@@ -61,22 +123,43 @@ private func callGemini(prompt: String, model: String, apiKey: String) async thr
         throw URLError(.badURL)
     }
     
+    print("📤 Gemini API Request:")
+    print("  URL: \(url)")
+    print("  Model: \(model)")
+    print("  API Key: \(apiKey.prefix(10))..." + (apiKey.count > 10 ? "***" : ""))
+    
     let body: [String: Any] = [
         "contents": [
             ["parts": [["text": prompt]]]
         ]
     ]
     
+    print("  Prompt length: \(prompt.count) chars")
+    print("  Prompt preview: \(prompt.prefix(200))...")
+    
     var request = URLRequest(url: url)
     request.httpMethod = "POST"
     request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-    // Add the API key to the header as per official documentation
     request.addValue(apiKey, forHTTPHeaderField: "x-goog-api-key")
-
     request.httpBody = try JSONSerialization.data(withJSONObject: body)
     
-    let (data, _) = try await URLSession.shared.data(for: request)
-    print("data: \(data)")
+    let (data, response) = try await URLSession.shared.data(for: request)
+    
+    // Log HTTP response details
+    if let httpResponse = response as? HTTPURLResponse {
+        print("📡 HTTP Status: \(httpResponse.statusCode)")
+        print("📡 Headers: \(httpResponse.allHeaderFields)")
+    }
+    
+    // Log raw response data
+    if let rawString = String(data: data, encoding: .utf8) {
+        print("📡 Raw Response Body:")
+        print(rawString)
+    } else {
+        print("⚠️ Could not decode response data as UTF-8")
+        print("📡 Raw Data bytes: \(data.count)")
+    }
+    
     // Simple decoding struct
     struct GeminiResponse: Decodable {
         struct Candidate: Decodable {
@@ -96,17 +179,62 @@ private func callGemini(prompt: String, model: String, apiKey: String) async thr
         }
     }
     
-    let response = try JSONDecoder().decode(GeminiResponse.self, from: data)
-    print("response: \(response)")
-    if let errorMessage = response.error?.message {
-        // Check for quota exceeded error
-        if errorMessage.contains("exceeded your current quota") || 
-           errorMessage.contains("quota") && errorMessage.contains("exceeded") {
-            throw LLMError.quotaExceeded
+    let geminiResponse = try JSONDecoder().decode(GeminiResponse.self, from: data)
+    print("📡 Decoded GeminiResponse:")
+    print("  - candidates count: \(geminiResponse.candidates?.count ?? 0)")
+    print("  - has error: \(geminiResponse.error != nil)")
+    
+    if let errorMessage = geminiResponse.error?.message {
+        print("❌ Gemini Error Message: \(errorMessage)")
+        // Try to extract richer error details (retryDelay, quota violations) from the raw JSON
+        var userMessage = errorMessage
+        var recovery: String? = nil
+
+        if let raw = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
+           let err = raw["error"] as? [String: Any] {
+
+            // Retry info
+            if let details = err["details"] as? [[String: Any]] {
+                for d in details {
+                    if let type = d["@type"] as? String, type.contains("RetryInfo") {
+                        if let retryDelay = d["retryDelay"] as? String {
+                            recovery = "Please retry after \(retryDelay)."
+                            userMessage += " \nRetry-After: \(retryDelay)"
+                        }
+                    }
+                    if let type = d["@type"] as? String, type.contains("QuotaFailure") {
+                        if let violations = d["violations"] as? [[String: Any]] {
+                            var parts: [String] = []
+                            for v in violations {
+                                if let metric = v["quotaMetric"] as? String {
+                                    parts.append(metric)
+                                }
+                            }
+                            if !parts.isEmpty {
+                                userMessage += " \nQuota failures: \(parts.joined(separator: ", "))"
+                            }
+                        }
+                    }
+                }
+            }
         }
-        throw NSError(domain: "GeminiError", code: -1, userInfo: [NSLocalizedDescriptionKey: errorMessage])
+
+        // If message clearly mentions quota, map to quota error code
+        if errorMessage.lowercased().contains("quota") || errorMessage.lowercased().contains("exceeded") {
+            let info: [String: Any] = [NSLocalizedDescriptionKey: userMessage, NSLocalizedRecoverySuggestionErrorKey: recovery ?? "Check your Gemini quota and billing settings."]
+            throw NSError(domain: "GeminiQuotaExceeded", code: 429, userInfo: info)
+        }
+
+        throw NSError(domain: "GeminiError", code: -1, userInfo: [NSLocalizedDescriptionKey: userMessage])
     }
-    return response.candidates?.first?.content.parts.first?.text ?? ""
+    
+    // Success case
+    let text = geminiResponse.candidates?.first?.content.parts.first?.text ?? ""
+    print("✅ Gemini Success - Response length: \(text.count) chars")
+    if text.isEmpty {
+        print("⚠️ Warning: Empty response text")
+    }
+    return text
 }
 
 private func generateResponse(prompt: String, session: LanguageModelSession) async throws -> String {
@@ -324,7 +452,7 @@ private func extractJSON(from text: String) -> WordCard? {
 
 func give_reply(input: String, session: LanguageModelSession) async throws -> (String, WordCard?) {
     let selectedModel = UserDefaults.standard.string(forKey: "selectedModel") ?? "local"
-    let prompt = SystemPrompt + "\n\nUser: " + input
+    let prompt = getSystemPrompt() + "\n\nUser: " + input
     
     if selectedModel == "local" {
         // Use typed generation for local model with self-evaluation
@@ -338,12 +466,12 @@ func give_reply(input: String, session: LanguageModelSession) async throws -> (S
             - IPA: \(card.ipa ?? "nil")
             - Part of Speech: \(card.part_of_speech ?? "nil")
             - Meaning (EN): \(card.meaning_en ?? "nil")
-            - Meaning (ZH): \(card.meaning_zh ?? "nil")
+            - Translation: \(card.translation ?? "nil")
             - Examples: \(card.examples?.count ?? 0) items
             - Extra Content: \(card.extra_content ?? "nil")
             
             Evaluate:
-            1. If it's a vocabulary query, are all required fields (word, ipa, part_of_speech, meaning_en, meaning_zh, examples) filled correctly?
+            1. If it's a vocabulary query, are all required fields (word, ipa, part_of_speech, meaning_en, translation, examples) filled correctly?
             2. Is the IPA notation valid?
             3. Are the examples natural and varied?
             4. If it's a general question, is extra_content used appropriately?
@@ -374,20 +502,27 @@ func give_reply(input: String, session: LanguageModelSession) async throws -> (S
         return ("", card)
         
     } else {
-        // For Gemini: Direct generation without self-eval
-        let responseContent = try await generateResponse(prompt: prompt, session: session)
-        let cleanedContent = removeThoughtBlocks(responseContent)
+        // For Gemini: Minimal prompt with data format only
+        let geminiPrompt = """
+        \(getGeminiSystemPrompt())
+        Generate WordCard JSON for: "\(input)"
+        - If word query: fill all fields (word, ipa, part_of_speech, meaning_en, meaning_zh, examples)
+        - If general question: use extra_content only
+        """
         
-        if let card = extractJSON(from: cleanedContent) {
+        let responseContent = try await generateResponse(prompt: geminiPrompt, session: session)
+        print(responseContent)        
+        if let card = extractJSON(from: responseContent) {
             print("✅ Parsed WordCard from Gemini: \(card.word ?? "N/A")")
             return ("", card)
         }
         
         // Fallback: wrap plain text in extra_content
-        let fallbackCard = WordCard(extra_content: cleanedContent)
+        let fallbackCard = WordCard(extra_content: responseContent)
         return ("", fallbackCard)
     }
 }
+
 
 private func extractExamJSON(from text: String) -> ExamData? {
     func tryDecodeExamData(_ jsonString: String) -> ExamData? {
@@ -617,26 +752,36 @@ func generateExam(words: [String], session: LanguageModelSession) async throws -
         
         for word in words.prefix(5) {
             let prompt = """
-            Create 1 vocabulary question for "\(word)".
-            
-            For multiple_choice:
-            - question: Ask word meaning or usage
-            - options: 4 REAL different definitions (1 correct, 3 plausible but wrong)
-            - answer: correct option index (1, 2, 3, or 4)
-            
-            For fill_in_blank:
-            - question: Natural sentence with _____ blank
-            - answerText: the word "\(word)"
-            
-            Output JSON: {"questions": [{"type": "...", "question": "...", ...}]}
+            JSON: {"questions": [{"type": "multiple_choice", "question": "...", "options": ["opt1", "opt2", "opt3", "opt4"], "answer": 1}]}
+            OR {"questions": [{"type": "fill_in_blank", "question": "... _____ ...", "answerText": "..."}]}
+            Word: "\(word)"
             """
             let responseContent = try await generateResponse(prompt: prompt, session: session)
             
             let cleanedContent = removeThoughtBlocks(responseContent)
             if let examData = extractExamJSON(from: cleanedContent),
                let question = examData.questions.first {
-                allQuestions.append(ExamQuestion(from: question))
-                print("✅ Generated question for \(word)")
+                // Fix 0-based answer index to 1-based if needed
+                var fixedQuestion = question
+                if question.type == "multiple_choice", let answer = question.answer {
+                    // Gemini often returns 0-based index (0-3), but we need 1-based (1-4)
+                    // If answer is 0, definitely 0-based. Convert all 0-3 to 1-4
+                    if answer >= 0 && answer <= 3 {
+                        let newAnswer = answer + 1
+                        print("⚠️ Converting answer from \(answer) to \(newAnswer) (0-based → 1-based)")
+                        fixedQuestion = GeneratedQuestion(
+                            type: question.type,
+                            question: question.question,
+                            options: question.options,
+                            passage: question.passage,
+                            answer: newAnswer,
+                            answerText: question.answerText
+                        )
+                    }
+                }
+                
+                allQuestions.append(ExamQuestion(from: fixedQuestion))
+                print("✅ Generated question for \(word) (answer: \(fixedQuestion.answer ?? -1))")
             } else {
                 print("⚠️ Failed to parse question for \(word)")
             }
@@ -756,21 +901,10 @@ func evaluateAnswer(question: String, correctAnswer: String, userAnswer: String,
         return AnswerEvaluation(isCorrect: false, feedback: "Evaluation error")
         
     } else {
-        // For Gemini: Direct evaluation without self-eval, with simple fallback
+        // For Gemini: Minimal evaluation prompt
         let prompt = """
-        Evaluate this English answer:
-        
-        Question: "\(question)"
-        Expected: "\(correctAnswer)"
-        Student: "\(userAnswer)"
-        
-        Rate with:
-        - category: "Perfect", "Acceptable", "Close", or "Wrong"
-        - score: 100 (perfect), 80 (acceptable), 50 (close), 0 (wrong)
-        - feedback: Brief explanation
-        - corrected_answer: Fixed version if needed, or null
-        
-        Output in JSON format.
+        JSON: {"category": "Perfect|Acceptable|Close|Wrong", "score": 0-100, "feedback": "...", "corrected_answer": "..."}
+        Q: "\(question)" Expected: "\(correctAnswer)" Student: "\(userAnswer)"
         """
         
         let responseContent = try await generateResponse(prompt: prompt, session: session)
@@ -818,5 +952,3 @@ struct SelfEvaluation {
 private func requestSelfEvaluation(prompt: String, session: LanguageModelSession) async throws -> SelfEvaluation {
     return try await session.respond(to: prompt, generating: SelfEvaluation.self).content
 }
-
-

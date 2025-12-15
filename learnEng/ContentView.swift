@@ -216,6 +216,9 @@ struct ContentView: View {
                         // Add padding for the floating button
                         Color.clear.frame(height: 60)
                         ExamView()
+                    } else if selectedPage == "News" {
+                        Color.clear.frame(height: 60)
+                        NewsView()
                     } else if selectedPage == "Settings" {
                         Color.clear.frame(height: 60)
                         SettingsView()
@@ -240,7 +243,6 @@ struct ContentView: View {
                         .font(.system(size: 30))
                 }
                 .padding()
-                .buttonStyle(.borderedProminent)
                 .zIndex(3) // Ensure it's above everything
                 
                 if show_panel {
