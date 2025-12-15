@@ -1,6 +1,6 @@
 from google import genai
 
-client = genai.Client(api_key='AIzaSyCzqk4seKykYFrx04OYUx0lDMNDYtvEu0U')
+client = genai.Client()
 
 print("List of models that support generateContent:\n")
 for m in client.models.list():

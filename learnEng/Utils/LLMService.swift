@@ -389,74 +389,6 @@ func give_reply(input: String, session: LanguageModelSession) async throws -> (S
     }
 }
 
-let ExamSystemPrompt = """
-You are an English Teacher creating vocabulary practice questions.
-
-Generate questions for these types:
-
-1. multiple_choice: Test word meaning with 4 options
-   - type: "multiple_choice"
-   - question: The question text (e.g., "What does 'happy' mean?")
-   - options: Array of 4 strings (REQUIRED)
-   - answer: The index of correct option as INTEGER (1, 2, 3, or 4)
-   - DO NOT include answerText
-   - DO NOT include passage
-
-2. fill_in_blank: Test usage with a sentence containing _____
-   - type: "fill_in_blank"
-   - question: Sentence with _____ (e.g., "She felt _____ when she won the prize.")
-   - answerText: The target word (string)
-   - DO NOT include options
-   - DO NOT include passage
-   - DO NOT include answer
-
-3. reading: Comprehension question with a passage and 4 options
-   - type: "reading"
-   - passage: A complete story WITHOUT any blanks (2-3 sentences, NO _____)
-   - question: Comprehension question about the passage (e.g., "What is the main idea?")
-   - options: Array of 4 strings (REQUIRED)
-   - answer: The index of correct option as INTEGER (1, 2, 3, or 4)
-   - DO NOT include answerText
-   - Passage must be COMPLETE text, not a fill-in-blank
-
-CRITICAL RULES:
-- For multiple_choice: MUST have "options" array (4 strings) and "answer" (integer 1-4)
-- For reading: MUST have "passage" (complete text), "options" array (4 strings), and "answer" (integer 1-4)
-- For fill_in_blank: MUST have "question" (with _____) and "answerText" (string)
-- Reading passages MUST be complete stories WITHOUT any _____ blanks
-- NEVER mix question types - if it has _____, use fill_in_blank type, not reading
-- NEVER omit the options field for multiple_choice or reading questions
-
-WRONG reading example (DO NOT DO THIS):
-{
-  "type": "reading",
-  "passage": "Despite his _____ nature, he managed to complete the project.",
-  "question": "...",
-  "options": null
-}
-
-CORRECT reading example:
-{
-  "type": "reading",
-  "passage": "John loved to read books. Every weekend, he would visit the library and borrow at least three novels. His favorite genre was mystery.",
-  "question": "What did John like to do on weekends?",
-  "options": ["Play sports", "Visit the library", "Watch movies", "Go shopping"],
-  "answer": 2
-}
-
-CORRECT fill_in_blank example:
-{
-  "type": "fill_in_blank",
-  "question": "She felt _____ when she won the prize.",
-  "answerText": "happy"
-}
-
-OUTPUT FORMAT:
-You can output either:
-1. A single JSON object with "questions" array: {"questions": [question1, question2, ...]}
-2. OR multiple JSON code blocks, one question per block (both formats are supported)
-"""
-
 private func extractExamJSON(from text: String) -> ExamData? {
     func tryDecodeExamData(_ jsonString: String) -> ExamData? {
         guard let data = jsonString.data(using: .utf8) else {
@@ -543,201 +475,174 @@ func generateExam(words: [String], session: LanguageModelSession) async throws -
     let selectedModel = UserDefaults.standard.string(forKey: "selectedModel") ?? "local"
     
     if selectedModel == "local" {
-        // Strategy: Try with all words first, if safety guardrails trigger, retry with fewer words
+        // One-by-one generation to avoid context overflow
         var allQuestions: [ExamQuestion] = []
-        var remainingWords = words
-        var retryCount = 0
-        let maxRetries = 3
+        var wordIndex = 0
+        var consecutiveFailures = 0
+        let targetCount = 5
+        let maxConsecutiveFailures = 8
         
-        while !remainingWords.isEmpty && retryCount < maxRetries {
-            // Take up to 3 words at a time to avoid triggering safety filters
-            let batchSize = min(3, remainingWords.count)
-            let currentBatch = Array(remainingWords.prefix(batchSize))
-            let wordList = currentBatch.joined(separator: ", ")
+        while allQuestions.count < targetCount && consecutiveFailures < maxConsecutiveFailures && wordIndex < words.count * 3 {
+            let word = words[wordIndex % words.count]
             
-            let questionsNeeded = min(5 - allQuestions.count, batchSize * 2) // 2 questions per word
-            let prompt = ExamSystemPrompt + "\n\nCreate \(questionsNeeded) practice questions for: \(wordList)"
+            // Create a FRESH session for each question to avoid context accumulation
+            let examSession = LanguageModelSession()
+            
+            // Randomly choose question type to avoid repetition
+            let types = ["multiple_choice", "fill_in_blank"]
+            let randomType = types.randomElement()!
+            
+            // Ultra-short prompt to minimize context
+            let prompt: String
+            if randomType == "multiple_choice" {
+                prompt = """
+                Create 1 multiple_choice question for "\(word)".
+                - question: Ask meaning or usage
+                - options: 4 DIFFERENT real definitions (1 correct + 3 wrong)
+                - answer: correct option number (1-4)
+                JSON: {"questions": [{"type": "multiple_choice", "question": "...", "options": ["...", "...", "...", "..."], "answer": 1}]}
+                """
+            } else {
+                prompt = """
+                Create 1 fill_in_blank for "\(word)".
+                - question: Natural sentence with _____ 
+                - answerText: "\(word)"
+                JSON: {"questions": [{"type": "fill_in_blank", "question": "...", "answerText": "..."}]}
+                """
+            }
             
             do {
-                print("🔄 Attempting to generate \(questionsNeeded) questions for: \(wordList)")
-                var examData = try await session.respond(to: prompt, generating: ExamData.self).content
+                print("🔄 Generating \(randomType) question \(allQuestions.count + 1)/\(targetCount) for: \(word)")
+                let examData = try await examSession.respond(to: prompt, generating: ExamData.self).content
                 
-                // Validation: Check if questions are properly formatted
-                var hasInvalidQuestions = false
-                var invalidReason = ""
-                for question in examData.questions {
-                    if (question.type == "reading" || question.type == "multiple_choice") {
-                        // Check options
-                        if question.options == nil || question.options?.count != 4 {
-                            hasInvalidQuestions = true
-                            invalidReason = "type=\(question.type) missing options"
-                            print("⚠️ Invalid: \(invalidReason)")
-                            break
-                        }
-                        // Check reading passage doesn't have blanks
-                        if question.type == "reading" {
-                            if let passage = question.passage, passage.contains("_____") {
-                                hasInvalidQuestions = true
-                                invalidReason = "reading passage contains blanks (should be fill_in_blank type)"
-                                print("⚠️ Invalid: \(invalidReason)")
-                                break
-                            }
-                            if question.passage == nil {
-                                hasInvalidQuestions = true
-                                invalidReason = "reading question missing passage"
-                                print("⚠️ Invalid: \(invalidReason)")
-                                break
-                            }
-                        }
-                    } else if question.type == "fill_in_blank" {
-                        // Check fill_in_blank has answerText
-                        if question.answerText == nil || question.answerText?.isEmpty == true {
-                            hasInvalidQuestions = true
-                            invalidReason = "fill_in_blank missing answerText"
-                            print("⚠️ Invalid: \(invalidReason)")
-                            break
-                        }
-                    }
-                }
-                
-                // Self-evaluation: check if exam is well-formed
-                for attempt in 0..<10 {
-                    let evalPrompt = """
-                    Review the exam you just generated:
-                    - Total questions: \(examData.questions.count)
-                    - Question types: \(examData.questions.map { $0.type }.joined(separator: ", "))
-                    
-                    Evaluate:
-                    1. Are there at least \(questionsNeeded) questions?
-                    2. Are all options REAL text (not placeholders)?
-                    3. For multiple_choice and reading questions: Do they ALL have exactly 4 options?
-                    4. For reading questions: Are passages complete stories WITHOUT _____ blanks?
-                    5. For fill_in_blank questions: Do they have answerText field?
-                    6. Are questions related to: \(wordList)?
-                    
-                    Output a score (0-100) and reason.
-                    """
-                    
-                    let evaluation = try await requestSelfEvaluation(prompt: evalPrompt, session: session)
-                    //print("📊 Exam Self-Eval (attempt \(attempt + 1)): Score \(evaluation.score), Reason: \(evaluation.reason)")
-                    
-                    if evaluation.score >= 85 && !hasInvalidQuestions {
-                        break
-                    } else if attempt < 1 {
-                        let fixPrompt = """
-                        Improve your exam (Score: \(evaluation.score)).
-                        Issue: \(evaluation.reason)
-                        \(hasInvalidQuestions ? "CRITICAL ERROR: \(invalidReason)" : "")
-                        
-                        Target words: \(wordList)
-                        Generate \(questionsNeeded) quality questions.
-                        
-                        REMEMBER:
-                        - multiple_choice and reading: MUST have "options" array with 4 strings
-                        - reading: passage must be COMPLETE text (NO _____ blanks)
-                        - fill_in_blank: MUST have "answerText" field
-                        - If passage has _____, use fill_in_blank type, NOT reading type
-                        """
-                        examData = try await session.respond(to: fixPrompt, generating: ExamData.self).content
-                        
-                        // Re-validate after regeneration
-                        hasInvalidQuestions = false
-                        invalidReason = ""
-                        for question in examData.questions {
-                            if (question.type == "reading" || question.type == "multiple_choice") {
-                                if question.options == nil || question.options?.count != 4 {
-                                    hasInvalidQuestions = true
-                                    invalidReason = "missing options"
-                                    break
-                                }
-                                if question.type == "reading" {
-                                    if let passage = question.passage, passage.contains("_____") {
-                                        hasInvalidQuestions = true
-                                        invalidReason = "reading passage has blanks"
-                                        break
-                                    }
-                                }
-                            } else if question.type == "fill_in_blank" {
-                                if question.answerText == nil || question.answerText?.isEmpty == true {
-                                    hasInvalidQuestions = true
-                                    invalidReason = "fill_in_blank missing answerText"
-                                    break
-                                }
-                            }
-                        }
-                    }
-                }
-                
-                // Successfully generated, add to results
-                let newQuestions = examData.questions.map { ExamQuestion(from: $0) }
-                print(newQuestions)
-                allQuestions.append(contentsOf: newQuestions)
-                print("✅ Generated \(newQuestions.count) questions, total: \(allQuestions.count)")
-                
-                // Remove processed words
-                remainingWords.removeFirst(batchSize)
-                retryCount = 0 // Reset retry count on success
-                
-                // Stop if we have enough questions
-                if allQuestions.count >= 5 {
-                    break
-                }
-                
-            } catch {
-                print("⚠️ Safety guardrails triggered for batch: \(wordList)")
-                print("🔄 Trying with next words...")
-                
-                // Skip problematic words and try next batch
-                remainingWords.removeFirst(min(1, remainingWords.count))
-                retryCount += 1
-                
-                // If we have some questions already, continue
-                if !allQuestions.isEmpty {
+                // Get the first question from response
+                guard let questionData = examData.questions.first else {
+                    print("⚠️ No question returned")
+                    consecutiveFailures += 1
+                    wordIndex += 1
                     continue
-                } else if retryCount >= maxRetries {
-                    // Only throw error if we couldn't generate ANY questions after multiple retries
-                    throw NSError(
-                        domain: "ExamGenerationError",
-                        code: -1,
-                        userInfo: [
-                            NSLocalizedDescriptionKey: "Unable to generate questions with current vocabulary. Some words may trigger safety filters.",
-                            NSLocalizedRecoverySuggestionErrorKey: "Try using different vocabulary words or switch to Gemini model in Settings."
-                        ]
-                    )
+                }
+                
+                // Validate the single question
+                var isValid = false
+                var validationMsg = ""
+                
+                if questionData.type == "multiple_choice" {
+                    isValid = questionData.options?.count == 4 && questionData.answer != nil
+                    if !isValid {
+                        validationMsg = "multiple_choice needs 4 options and answer, got options=\(questionData.options?.count ?? 0)"
+                    }
+                } else if questionData.type == "fill_in_blank" {
+                    isValid = questionData.answerText != nil && 
+                              !(questionData.answerText?.isEmpty ?? true) &&
+                              (questionData.question.contains("_____") || questionData.question.contains("___"))
+                    if !isValid {
+                        validationMsg = "fill_in_blank needs answerText and _____"
+                    }
+                } else {
+                    validationMsg = "Unsupported type: \(questionData.type)"
+                }
+                
+                if !isValid {
+                    print("⚠️ Invalid: \(validationMsg)")
+                }
+                
+                if isValid {
+                    let newQuestion = ExamQuestion(from: questionData)
+                    // Check for duplicates
+                    if !allQuestions.contains(where: { $0.question == newQuestion.question }) {
+                        allQuestions.append(newQuestion)
+                        print("✅ Added question \(allQuestions.count)/\(targetCount)")
+                        consecutiveFailures = 0
+                    } else {
+                        print("⚠️ Duplicate question, skipping")
+                        consecutiveFailures += 1
+                    }
+                } else {
+                    consecutiveFailures += 1
+                }
+                
+                wordIndex += 1
+                
+            } catch let error {
+                let errorMsg = error.localizedDescription
+                print("⚠️ Error: \(errorMsg)")
+                
+                // If context overflow, skip this word entirely
+                if errorMsg.contains("context") || errorMsg.contains("Context") {
+                    print("⚠️ Skipping word '\(word)' due to context limit")
+                    wordIndex += 1
+                    consecutiveFailures += 1
+                } else if errorMsg.contains("deserialize") {
+                    // Model output format issue, try again with different word
+                    print("⚠️ Format error, trying next word")
+                    wordIndex += 1
+                    consecutiveFailures += 1
+                } else {
+                    consecutiveFailures += 1
+                    wordIndex += 1
+                }
+                
+                // If too many failures, stop early
+                if consecutiveFailures >= 3 && allQuestions.count >= 2 {
+                    print("⚠️ Too many failures, returning \(allQuestions.count) questions")
+                    break
                 }
             }
         }
         
-        // Return whatever questions we managed to generate
+        // Return whatever we managed to generate
         if allQuestions.isEmpty {
             throw NSError(
                 domain: "ExamGenerationError",
-                code: -2,
+                code: -1,
                 userInfo: [
-                    NSLocalizedDescriptionKey: "No questions could be generated. Please try different vocabulary words."
+                    NSLocalizedDescriptionKey: "Unable to generate any valid questions.",
+                    NSLocalizedRecoverySuggestionErrorKey: "Try simpler vocabulary words or switch to Gemini model in Settings."
                 ]
             )
         }
         
-        print("✅ Final exam: \(allQuestions.count) questions generated")
-        return Array(allQuestions.prefix(5)) // Return at most 5 questions
-        
-    } else {
-        // For Gemini: Direct generation without self-eval (avoid confusion)
-        let wordList = words.joined(separator: ", ")
-        let prompt = ExamSystemPrompt + "\n\nCreate 5 practice questions for: \(wordList)"
-        let responseContent = try await generateResponse(prompt: prompt, session: session)
-        
-        print("📝 Gemini Exam Response: \(responseContent)")
-        
-        let cleanedContent = removeThoughtBlocks(responseContent)
-        if let examData = extractExamJSON(from: cleanedContent) {
-            print("✅ Parsed \(examData.questions.count) questions from Gemini")
-            return examData.questions.map { ExamQuestion(from: $0) }
+        if allQuestions.count < targetCount {
+            print("⚠️ Only generated \(allQuestions.count)/\(targetCount) questions")
+        } else {
+            print("✅ Generated \(allQuestions.count) questions")
         }
         
-        print("⚠️ Failed to parse exam JSON from Gemini response")
-        return []
+        return allQuestions
+        
+    } else {
+        // For Gemini: Generate questions one by one
+        var allQuestions: [ExamQuestion] = []
+        
+        for word in words.prefix(5) {
+            let prompt = """
+            Create 1 vocabulary question for "\(word)".
+            
+            For multiple_choice:
+            - question: Ask word meaning or usage
+            - options: 4 REAL different definitions (1 correct, 3 plausible but wrong)
+            - answer: correct option index (1, 2, 3, or 4)
+            
+            For fill_in_blank:
+            - question: Natural sentence with _____ blank
+            - answerText: the word "\(word)"
+            
+            Output JSON: {"questions": [{"type": "...", "question": "...", ...}]}
+            """
+            let responseContent = try await generateResponse(prompt: prompt, session: session)
+            
+            let cleanedContent = removeThoughtBlocks(responseContent)
+            if let examData = extractExamJSON(from: cleanedContent),
+               let question = examData.questions.first {
+                allQuestions.append(ExamQuestion(from: question))
+                print("✅ Generated question for \(word)")
+            } else {
+                print("⚠️ Failed to parse question for \(word)")
+            }
+        }
+        
+        return allQuestions
     }
 }
 
