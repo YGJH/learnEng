@@ -8,7 +8,6 @@ struct SettingsView: View {
     let models = [
         "local": "Local Model (On-Device)",
         "gemini-2.5-flash": "Gemini 2.5 Flash",
-        "gemini-2.5-flash-lite": "Gemini 2.5 Flash Lite",
         "gemini-3-pro-preview": "Gemini 3 Pro Preview"
     ]
     
@@ -72,12 +71,6 @@ struct SettingsView: View {
                     selectedModel = String(selectedModel.dropFirst(7))
                 }
                 
-                // Migration for old model IDs
-                if selectedModel == "gemini-1.5-flash" {
-                    selectedModel = "gemini-1.5-flash-latest"
-                } else if selectedModel == "gemini-1.5-pro" {
-                    selectedModel = "gemini-1.5-pro-latest"
-                }
             }
         }
     }

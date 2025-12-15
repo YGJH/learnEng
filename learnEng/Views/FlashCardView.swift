@@ -129,7 +129,7 @@ struct FlashCardView: View {
                         // Progress bar
                         VStack(spacing: 8) {
                             HStack {
-                                Text("\(currentIndex + 1) / \(cards.count)")
+                                Text("\(min(currentIndex + 1, cards.count)) / \(cards.count)")
                                     .font(.headline)
                                     .foregroundStyle(.secondary)
                                 
@@ -141,7 +141,7 @@ struct FlashCardView: View {
                             }
                             .padding(.horizontal)
                             
-                            ProgressView(value: Double(currentIndex + 1), total: Double(cards.count))
+                            ProgressView(value: Double(min(currentIndex + 1, cards.count)), total: Double(cards.count))
                                 .tint(.blue)
                                 .padding(.horizontal)
                         }
