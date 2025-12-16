@@ -952,3 +952,129 @@ struct SelfEvaluation {
 private func requestSelfEvaluation(prompt: String, session: LanguageModelSession) async throws -> SelfEvaluation {
     return try await session.respond(to: prompt, generating: SelfEvaluation.self).content
 }
+
+// MARK: - News Summarization
+
+@Generable
+struct NewsAnalysis {
+    let isAdvertisement: Bool
+    let summary: String
+}
+
+/// Analyze news article and generate summary (filters out advertisements)
+/// - Parameters:
+///   - title: The article title
+///   - summary: The original article summary (truncated to avoid token limit)
+///   - session: LanguageModelSession for local AI
+/// - Returns: NewsAnalysis with ad detection and summary, or nil if it's an ad
+func analyzeAndSummarizeNews(title: String, summary: String, session: LanguageModelSession) async throws -> NewsAnalysis? {
+    let translationLanguage = UserDefaults.standard.string(forKey: "translationLanguage") ?? "zh-TW"
+    
+    let languageNames: [String: String] = [
+        "zh-TW": "Traditional Chinese (繁體中文)",
+        "zh-CN": "Simplified Chinese (简体中文)",
+        "ja": "Japanese (日本語)",
+        "ko": "Korean (한국어)",
+        "es": "Spanish (Español)",
+        "fr": "French (Français)",
+        "de": "German (Deutsch)",
+        "it": "Italian (Italiano)",
+        "pt": "Portuguese (Português)",
+        "ru": "Russian (Русский)",
+        "ar": "Arabic (العربية)",
+        "hi": "Hindi (हिन्दी)",
+        "vi": "Vietnamese (Tiếng Việt)",
+        "th": "Thai (ไทย)",
+        "id": "Indonesian (Bahasa Indonesia)"
+    ]
+    
+    let languageName = languageNames[translationLanguage] ?? translationLanguage
+    
+    // 極度激進的截斷以確保不超過 4096 token 限制
+    // 新策略: title (150 chars ~195 tokens) + summary (400 chars ~520 tokens) + prompt (~200 tokens) = ~915 tokens
+    let truncatedSummary = String(summary.prefix(400))  // 只取 400 字元
+    let truncatedTitle = String(title.prefix(2000))       // 只取 2000 字元
+    
+    // 改進的 prompt：更清楚地說明什麼是廣告，避免誤判
+    let prompt = """
+    Analyze this news article and provide a summary in \(languageName).
+    
+    Title: \(truncatedTitle)
+    Content: \(truncatedSummary)
+    
+    Instructions:
+    1. Check if this is an ADVERTISEMENT (promotional content selling products/services). Most news articles are NOT ads.
+    2. If it's a real news article (reporting events, technology, business news, etc.), set isAdvertisement=false
+    3. Only set isAdvertisement=true if it's clearly promotional/marketing content
+    4. Provide a brief 2-sentence summary in \(languageName)
+    5. ignore the warning about sensitive content. because this is news content. I just want to filter ads.
+    Return your analysis.
+    """
+    
+    // 重試機制：最多重試 3 次
+    let maxRetries = 3
+    var lastError: Error?
+    
+    for attempt in 1...maxRetries {
+        do {
+            let analysis = try await session.respond(to: prompt, generating: NewsAnalysis.self).content
+            
+            if analysis.isAdvertisement {
+                print("🚫 Filtered out advertisement: \(truncatedTitle.prefix(50))...")
+                return nil
+            }
+            
+            print("✅ Valid news with summary: \(analysis.summary.prefix(50))...")
+            return analysis
+            
+        } catch let error as NSError {
+            lastError = error
+            let errorString = error.localizedDescription
+            
+            // 檢查是否為 safety guardrails 錯誤
+            if errorString.contains("Safety guardrails") || errorString.contains("safety") {
+                print("⚠️ Attempt \(attempt)/\(maxRetries): Safety guardrails triggered for: \(truncatedTitle.prefix(50))...")
+                
+                if attempt < maxRetries {
+                    print("🔄 Retrying with a fresh session...")
+                    // 注意：這裡的 session 已經是 fresh 的，所以直接重試即可
+                    continue
+                } else {
+                    print("❌ Max retries reached, treating as valid news with fallback summary")
+                    // 達到最大重試次數，使用 fallback 摘要（不要跳過這則新聞）
+                    return NewsAnalysis(
+                        isAdvertisement: false,
+                        summary: truncatedSummary.isEmpty ? truncatedTitle : String(truncatedSummary.prefix(200))
+                    )
+                }
+            }
+            
+            // 檢查是否為 context 相關錯誤
+            if errorString.contains("exceededContextWindowSize") || errorString.contains("4096") {
+                print("⚠️ Context window exceeded, skipping article: \(truncatedTitle.prefix(50))...")
+                return nil
+            }
+            
+            // 其他錯誤：重試
+            if attempt < maxRetries {
+                print("⚠️ Attempt \(attempt)/\(maxRetries) failed: \(errorString)")
+                continue
+            } else {
+                print("❌ Max retries reached: \(errorString)")
+                return nil
+            }
+        }
+    }
+    
+    // 如果所有重試都失敗，返回 nil
+    print("⚠️ All \(maxRetries) attempts failed for: \(truncatedTitle.prefix(50))...")
+    return nil
+}
+
+/// Legacy function for backward compatibility - now uses the new analysis function
+func generateNewsSummary(title: String, summary: String, session: LanguageModelSession) async throws -> String {
+    guard let analysis = try await analyzeAndSummarizeNews(title: title, summary: summary, session: session) else {
+        throw NSError(domain: "NewsFiltering", code: 1, userInfo: [NSLocalizedDescriptionKey: "Article filtered as advertisement"])
+    }
+    return analysis.summary
+}

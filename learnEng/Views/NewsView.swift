@@ -1,10 +1,23 @@
 import SwiftUI
+import FoundationModels
 
 struct NewsView: View {
     @State private var newsResponse: NewsResponse?
     @State private var isLoading = false
     @State private var errorMessage: String?
     @State private var selectedArticle: NewsArticle?
+    @State private var session = LanguageModelSession()
+    @State private var articlesWithAI: [NewsArticle] = []
+    @State private var isGeneratingSummaries = false
+    @State private var selectedCategory: String = "all"
+    
+    let categories = [
+        ("all", "All News", "newspaper.fill"),
+        ("general", "General", "globe"),
+        ("technology", "Technology", "laptopcomputer"),
+        ("business", "Business", "briefcase.fill"),
+        ("world", "World", "globe.americas.fill")
+    ]
     
     var body: some View {
         NavigationStack {
@@ -52,7 +65,7 @@ struct NewsView: View {
                         .buttonStyle(.borderedProminent)
                         .padding(.bottom, 40)
                     }
-                } else if let response = newsResponse {
+                } else if !articlesWithAI.isEmpty || isGeneratingSummaries {
                     ScrollView {
                         LazyVStack(spacing: 20) {
                             // Hero Header with Gradient
@@ -74,23 +87,52 @@ struct NewsView: View {
                                 
                                 VStack(alignment: .leading, spacing: 8) {
                                     HStack {
-                                        Image(systemName: "newspaper.fill")
+                                        Image(systemName: isGeneratingSummaries ? "sparkles" : "checkmark.circle.fill")
                                             .font(.title2)
-                                        Text(response.category.capitalized)
+                                        Text(selectedCategory.capitalized)
                                             .font(.largeTitle)
                                             .fontWeight(.bold)
                                     }
                                     
-                                    Text("\(response.count) articles • Updated now")
-                                        .font(.subheadline)
-                                        .opacity(0.9)
+                                    HStack(spacing: 8) {
+                                        if isGeneratingSummaries {
+                                            Text("\(articlesWithAI.count) articles loading...")
+                                                .font(.subheadline)
+                                                .opacity(0.9)
+                                        } else {
+                                            Text("\(articlesWithAI.count) articles • AI Filtered")
+                                                .font(.subheadline)
+                                                .opacity(0.9)
+                                        }
+                                    }
                                 }
                                 .foregroundStyle(.white)
                                 .padding(24)
                             }
                             
+                            // Initial Loading State (when no articles yet)
+                            if articlesWithAI.isEmpty && isGeneratingSummaries {
+                                VStack(spacing: 16) {
+                                    ProgressView()
+                                        .scaleEffect(1.2)
+                                        .padding(.top, 40)
+                                    
+                                    Text("Analyzing articles with AI...")
+                                        .font(.subheadline)
+                                        .foregroundStyle(.secondary)
+                                    
+                                    if let response = newsResponse {
+                                        Text("Processing \(response.count) articles")
+                                            .font(.caption)
+                                            .foregroundStyle(.tertiary)
+                                    }
+                                }
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 60)
+                            }
+                            
                             // Featured Article (First one with larger card)
-                            if let firstArticle = response.articles.first {
+                            if let firstArticle = articlesWithAI.first {
                                 VStack(alignment: .leading, spacing: 12) {
                                     Text("FEATURED")
                                         .font(.caption)
@@ -105,7 +147,7 @@ struct NewsView: View {
                             }
                             
                             // Other Articles
-                            if response.articles.count > 1 {
+                            if articlesWithAI.count > 1 {
                                 VStack(alignment: .leading, spacing: 12) {
                                     Text("LATEST NEWS")
                                         .font(.caption)
@@ -114,12 +156,50 @@ struct NewsView: View {
                                         .padding(.horizontal, 20)
                                         .padding(.top, 8)
                                     
-                                    ForEach(response.articles.dropFirst()) { article in
+                                    ForEach(articlesWithAI.dropFirst()) { article in
                                         NewsArticleCard(article: article, onTap: {
                                             selectedArticle = article
-                                        })
+                                        }) 
                                     }
                                 }
+                            }
+                            
+                            // Processing Indicator (顯示在底部)
+                            if isGeneratingSummaries, let response = newsResponse {
+                                VStack(spacing: 16) {
+                                    Divider()
+                                        .padding(.horizontal, 20)
+                                    
+                                    HStack(spacing: 12) {
+                                        ProgressView()
+                                            .scaleEffect(0.8)
+                                        
+                                        VStack(alignment: .leading, spacing: 4) {
+                                            HStack(spacing: 6) {
+                                                Image(systemName: "sparkles")
+                                                    .font(.caption)
+                                                    .foregroundStyle(.purple)
+                                                Text("AI Processing News...")
+                                                    .font(.subheadline)
+                                                    .fontWeight(.medium)
+                                            }
+                                            
+                                            Text("\(articlesWithAI.count) / \(response.count) articles ready")
+                                                .font(.caption)
+                                                .foregroundStyle(.secondary)
+                                        }
+                                        
+                                        Spacer()
+                                    }
+                                    .padding(.horizontal, 20)
+                                    .padding(.vertical, 12)
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 12)
+                                            .fill(Color.purple.opacity(0.05))
+                                    )
+                                    .padding(.horizontal, 20)
+                                }
+                                .padding(.top, 8)
                             }
                         }
                         .padding(.bottom, 20)
@@ -181,15 +261,29 @@ struct NewsView: View {
                     }
                 }
             }
-            .navigationTitle("News")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        loadNews()
-                    } label: {
-                        Image(systemName: "arrow.clockwise")
+                ToolbarItem(placement: .principal) {
+                    // 頂部類別選擇條（放在導航欄中央）
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 12) {
+                            ForEach(categories, id: \.0) { category in
+                                CategoryChip(
+                                    title: category.1,
+                                    icon: category.2,
+                                    isSelected: selectedCategory == category.0,
+                                    action: {
+                                        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                                            selectedCategory = category.0
+                                            loadNews()
+                                        }
+                                    }
+                                )
+                            }
+                        }
+                        .padding(.horizontal, 8)
                     }
-                    .disabled(isLoading)
+                    .frame(maxWidth: .infinity)
                 }
             }
             .fullScreenCover(item: $selectedArticle) { article in
@@ -201,12 +295,22 @@ struct NewsView: View {
     func loadNews() {
         isLoading = true
         errorMessage = nil
+        articlesWithAI = []
         
         Task {
             do {
-                guard let url = URL(string: "http://192.168.3.191:8000/news") else {
+                // 構建 URL，包含類別和數量參數
+                var urlComponents = URLComponents(string: "http://192.168.3.191:8000/news")!
+                urlComponents.queryItems = [
+                    URLQueryItem(name: "category", value: selectedCategory),
+                    URLQueryItem(name: "limit", value: "50")
+                ]
+                
+                guard let url = urlComponents.url else {
                     throw URLError(.badURL)
                 }
+                
+                print("📡 Fetching news from: \(url.absoluteString)")
                 
                 let (data, response) = try await URLSession.shared.data(from: url)
                 
@@ -225,6 +329,10 @@ struct NewsView: View {
                     self.newsResponse = newsResponse
                     self.isLoading = false
                 }
+                
+                // 自動生成 AI 摘要
+                await generateAISummariesForArticles(newsResponse.articles)
+                
             } catch {
                 print("❌ Error loading news: \(error)")
                 await MainActor.run {
@@ -233,6 +341,93 @@ struct NewsView: View {
                 }
             }
         }
+    }
+    
+    func generateAISummariesForArticles(_ articles: [NewsArticle]) async {
+        await MainActor.run {
+            isGeneratingSummaries = true
+            articlesWithAI = [] // 開始時清空
+        }
+        
+        print("🤖 Starting AI analysis and summary generation for \(articles.count) articles...")
+        print("🔍 Filtering advertisements and generating summaries...")
+        
+        var processedCount = 0
+        var validCount = 0
+        var skippedCount = 0
+        
+        for (index, article) in articles.enumerated() {
+            processedCount = index + 1
+            
+            // 更新進度（但不顯示文章）
+            await MainActor.run {
+                // 這裡可以更新進度條，但不更新 articlesWithAI
+                print("� Progress: \(processedCount)/\(articles.count)")
+            }
+            
+            do {
+                print("📝 Analyzing article \(processedCount)/\(articles.count): \(article.title.prefix(50))...")
+                
+                // 為每篇文章創建新的 session 以避免 context 累積
+                let freshSession = LanguageModelSession()
+                
+                // 使用新的分析函數（會過濾廣告）
+                if let analysis = try await analyzeAndSummarizeNews(
+                    title: article.title,
+                    summary: article.summary,
+                    session: freshSession
+                ) {
+                    // 不是廣告，立即顯示
+                    var updatedArticle = article
+                    updatedArticle.aiSummary = analysis.summary
+                    
+                    // 立即更新 UI
+                    await MainActor.run {
+                        self.articlesWithAI.append(updatedArticle)
+                    }
+                    
+                    validCount += 1
+                    print("✅ Valid article #\(validCount) displayed: \(article.title.prefix(50))...")
+                } else {
+                    skippedCount += 1
+                    print("🚫 Advertisement filtered out: \(article.title.prefix(50))...")
+                }
+                
+            } catch let error as NSError {
+                let errorString = error.localizedDescription
+                if errorString.contains("exceededContextWindowSize") || errorString.contains("4096") {
+                    skippedCount += 1
+                    print("⚠️ Article too long (>4096 tokens), skipping: \(article.title.prefix(50))...")
+                } else if errorString.contains("context") || errorString.contains("Context") {
+                    skippedCount += 1
+                    print("⚠️ Context error, skipping: \(article.title.prefix(50))...")
+                } else {
+                    skippedCount += 1
+                    print("❌ Error analyzing article \(processedCount): \(errorString)")
+                }
+                continue
+            } catch {
+                skippedCount += 1
+                print("❌ Error analyzing article \(processedCount): \(error)")
+                continue
+            }
+            
+            // 每處理 5 篇打印進度
+            if processedCount % 5 == 0 {
+                print("📊 Progress: \(processedCount)/\(articles.count) processed | \(validCount) valid | \(skippedCount) skipped")
+            }
+        }
+        
+        // 處理完成
+        await MainActor.run {
+            self.isGeneratingSummaries = false
+        }
+        
+        print("✅ AI analysis completed!")
+        print("📊 Final Results:")
+        print("   - Processed: \(articles.count) articles")
+        print("   - Valid news: \(validCount) articles")
+        print("   - Filtered/Skipped: \(skippedCount) articles")
     }
 }
 
@@ -280,12 +475,26 @@ struct FeaturedNewsCard: View {
                     .multilineTextAlignment(.leading)
                     .lineLimit(3)
                 
-                // Summary
-                Text(article.summary)
-                    .font(.body)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(4)
-                    .multilineTextAlignment(.leading)
+                // AI Summary (所有顯示的文章都應該有 AI 摘要)
+                if let aiSummary = article.aiSummary {
+                    VStack(alignment: .leading, spacing: 8) {
+                        HStack(spacing: 4) {
+                            Image(systemName: "sparkles")
+                                .font(.caption2)
+                                .foregroundStyle(.purple)
+                            Text("AI Summary")
+                                .font(.caption2)
+                                .fontWeight(.semibold)
+                                .foregroundStyle(.purple)
+                        }
+                        
+                        Text(aiSummary)
+                            .font(.body)
+                            .foregroundStyle(.primary)
+                            .lineLimit(4)
+                            .multilineTextAlignment(.leading)
+                    }
+                }
                 
                 Divider()
                 
@@ -371,12 +580,19 @@ struct NewsArticleCard: View {
                         .multilineTextAlignment(.leading)
                         .lineLimit(2)
                     
-                    // Summary
-                    Text(article.summary)
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(2)
-                        .multilineTextAlignment(.leading)
+                    // AI Summary (所有顯示的文章都應該有 AI 摘要)
+                    if let aiSummary = article.aiSummary {
+                        HStack(spacing: 4) {
+                            Image(systemName: "sparkles")
+                                .font(.caption2)
+                                .foregroundStyle(.purple)
+                            Text(aiSummary)
+                                .font(.subheadline)
+                                .foregroundStyle(.primary)
+                                .lineLimit(2)
+                                .multilineTextAlignment(.leading)
+                        }
+                    }
                     
                     // Footer
                     HStack(spacing: 8) {
@@ -412,6 +628,49 @@ struct NewsArticleCard: View {
                     .stroke(Color(.separator).opacity(0.3), lineWidth: 1)
             )
             .padding(.horizontal, 16)
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+// Category Chip Component
+struct CategoryChip: View {
+    let title: String
+    let icon: String
+    let isSelected: Bool
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 6) {
+                Image(systemName: icon)
+                    .font(.caption)
+                Text(title)
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 8)
+            .background(
+                Group {
+                    if isSelected {
+                        LinearGradient(
+                            colors: [.blue, .purple],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    } else {
+                        Color(.secondarySystemBackground)
+                    }
+                }
+            )
+            .foregroundStyle(isSelected ? .white : .primary)
+            .clipShape(Capsule())
+            .overlay(
+                Capsule()
+                    .stroke(isSelected ? Color.clear : Color(.separator), lineWidth: 1)
+            )
+            .shadow(color: isSelected ? .blue.opacity(0.3) : .clear, radius: 8, x: 0, y: 4)
         }
         .buttonStyle(.plain)
     }

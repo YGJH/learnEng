@@ -13,6 +13,7 @@ struct NewsArticle: Codable, Identifiable {
     let source: String
     let published_at: String
     let category: String
+    var aiSummary: String? // AI 生成的摘要
     
     var id: String { link }
     
