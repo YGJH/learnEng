@@ -373,29 +373,24 @@ struct CardView: View {
             // Back side (translation) - 背面
             ZStack {
                 RoundedRectangle(cornerRadius: 20)
-                    .fill(
-                        LinearGradient(
-                            colors: [.purple, .blue],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
+                    .fill(Color(.systemBackground))
+                    .shadow(color: .black.opacity(0.2), radius: 10, x: 0, y: 5)
                 
                 VStack(spacing: 20) {
                     Image(systemName: "text.bubble.fill")
                         .font(.system(size: 40))
-                        .foregroundStyle(.white.opacity(0.8))
+                        .foregroundStyle(.purple)
                     
                     Text(card.translation)
                         .font(.title)
                         .fontWeight(.bold)
-                        .foregroundStyle(.white)
+                        .foregroundStyle(.primary)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 30)
                     
                     Text("(翻譯)")
                         .font(.caption)
-                        .foregroundStyle(.white.opacity(0.7))
+                        .foregroundStyle(.secondary)
                 }
             }
             .rotation3DEffect(

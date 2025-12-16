@@ -26,15 +26,6 @@ struct ExamView: View {
                 contentView
             }
             .navigationTitle("Exam")
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        showFlashCards = true
-                    } label: {
-                        Label("Flash Cards", systemImage: "rectangle.stack.fill")
-                    }
-                }
-            }
             .fullScreenCover(isPresented: $showFlashCards) {
                 FlashCardView()
             }
@@ -72,7 +63,7 @@ struct ExamView: View {
         if items.isEmpty {
             ContentUnavailableView("No Vocabulary", systemImage: "book.closed", description: Text("Add some words to your vocabulary first."))
         } else {
-            VStack(spacing: 20) {
+            VStack(spacing: 24) {
                 Image(systemName: "studentdesk")
                     .font(.system(size: 60))
                     .foregroundStyle(.blue)
@@ -86,11 +77,46 @@ struct ExamView: View {
                     .foregroundStyle(.secondary)
                     .padding(.horizontal)
                 
-                Button("Start Exam") {
-                    generateQuestions()
+                VStack(spacing: 12) {
+                    Button("Start Exam") {
+                        generateQuestions()
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .controlSize(.large)
+                    
+                    // 閃卡按鈕 - 更明顯的設計
+                    Button {
+                        showFlashCards = true
+                    } label: {
+                        HStack(spacing: 12) {
+                            Image(systemName: "rectangle.stack.fill")
+                                .font(.title3)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Review with Flash Cards")
+                                    .font(.headline)
+                                Text("Quick memory practice")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        .padding()
+                        .frame(maxWidth: .infinity)
+                        .background(
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(Color(.secondarySystemBackground))
+                        )
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(Color.blue.opacity(0.3), lineWidth: 2)
+                        )
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.horizontal)
                 }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.large)
             }
         }
     }

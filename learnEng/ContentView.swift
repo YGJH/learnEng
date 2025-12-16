@@ -112,102 +112,15 @@ struct ContentView: View {
                         // Add padding for the floating button
                         Color.clear.frame(height: 60)
                         
-                        if model.availability == .available {
-                        VStack(spacing: 0) {
-                            ScrollView {
-                                LazyVStack(spacing: 16) {
-                                    ForEach(chattingSession) { message in
-                                        VStack(alignment: .leading, spacing: 12) {
-                                            // User message bubble
-                                            HStack {
-                                                Spacer()
-                                                Text(message.query)
-                                                    .font(.body)
-                                                    .padding(.horizontal, 16)
-                                                    .padding(.vertical, 12)
-                                                    .background(Color.accentColor)
-                                                    .foregroundColor(.white)
-                                                    .clipShape(RoundedRectangle(cornerRadius: 18))
-                                            }
-                                            
-                                            // AI message bubble
-                                            HStack(alignment: .top, spacing: 10) {
-                                                // AI avatar
-                                                Circle()
-                                                    .fill(Color.accentColor.opacity(0.2))
-                                                    .frame(width: 36, height: 36)
-                                                    .overlay(
-                                                        Image(systemName: "brain.head.profile")
-                                                            .font(.system(size: 18))
-                                                            .foregroundColor(.accentColor)
-                                                    )
-                                                
-                                                if let card = message.card {
-                                                    WordCardView(card: card, query: message.query)
-                                                } else if message.reply.isEmpty {
-                                                    HStack(spacing: 8) {
-                                                        ProgressView()
-                                                        Text("Thinking...")
-                                                            .font(.subheadline)
-                                                            .foregroundColor(.secondary)
-                                                    }
-                                                    .padding(.horizontal, 16)
-                                                    .padding(.vertical, 12)
-                                                    .background(Color(.secondarySystemBackground))
-                                                    .clipShape(RoundedRectangle(cornerRadius: 18))
-                                                } else {
-                                                    Text(message.formattedReply)
-                                                        .font(.body)
-                                                        .padding(.horizontal, 16)
-                                                        .padding(.vertical, 12)
-                                                        .background(Color(.secondarySystemBackground))
-                                                        .foregroundColor(.accentColor)
-                                                        .clipShape(RoundedRectangle(cornerRadius: 18))
-                                                }
-                                                
-                                                Spacer()
-                                            }
-                                        }
-                                    }
-                                }
-                                .padding(.horizontal, 16)
-                                .padding(.vertical, 12)
-                            }
-                            
-                            Divider()
-                            
-                            // Input area
-                            HStack(spacing: 12) {
-                                TextField("Type a word to look up...", text: $user_input, axis: .vertical)
-                                    .lineLimit(1...4)
-                                    .padding(.horizontal, 16)
-                                    .padding(.vertical, 12)
-                                    .background(Color(.tertiarySystemBackground))
-                                    .foregroundStyle(Color(.label))
-                                    .clipShape(RoundedRectangle(cornerRadius: 20))
-                                    .onSubmit {
-                                        sendMessage()
-                                    }
-                                
-                                Button {
-                                    sendMessage()
-                                } label: {
-                                    state_img
-                                        .font(.system(size: 20))
-                                        .frame(width: 44, height: 44)
-                                }
-                                .buttonStyle(.borderedProminent)
-                                .opacity(0.5)
-                                .clipShape(Circle())
-                            }
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 12)
-                            .background(Color(.systemBackground))
-                        }
-                        
-                        } else {
-                            Text("Please enable Language model in settings")
-                        }
+                        ChatView(
+                            userInput: $user_input,
+                            chattingSession: $chattingSession,
+                            waitingModelReply: $waiting_model_reply,
+                            stateImg: $state_img,
+                            modelSession: $model_session,
+                            model: model,
+                            onSendMessage: sendMessage
+                        )
                     } else if selectedPage == "Vocabulrary" {
                         // Add padding for the floating button
                         Color.clear.frame(height: 60)

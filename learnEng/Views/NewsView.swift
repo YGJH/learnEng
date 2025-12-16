@@ -300,7 +300,7 @@ struct NewsView: View {
         Task {
             do {
                 // 構建 URL，包含類別和數量參數
-                var urlComponents = URLComponents(string: "http://192.168.3.191:8000/news")!
+                var urlComponents = URLComponents(string: "https://raw.githubusercontent.com/YGJH/learnEng/refs/heads/main/exp/news.json")!
                 urlComponents.queryItems = [
                     URLQueryItem(name: "category", value: selectedCategory),
                     URLQueryItem(name: "limit", value: "50")
