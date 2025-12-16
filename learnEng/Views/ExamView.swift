@@ -6,6 +6,7 @@ struct ExamView: View {
     @Query private var items: [Item]
     @State private var questions: [ExamQuestion] = []
     @State private var isGenerating = false
+    @State private var generationProgress: Double = 0.0
     @State private var userAnswers: [UUID: String] = [:]
     @State private var showResults = false
     @State private var session = LanguageModelSession(tools: [DictionaryTool()])
@@ -62,13 +63,35 @@ struct ExamView: View {
     }
     
     private var loadingView: some View {
-        VStack(spacing: 20) {
-            ProgressView()
-                .scaleEffect(1.5)
-                .tint(.blue)
-            Text("Generating Exam...")
-                .font(.headline)
-                .foregroundStyle(.secondary)
+        VStack(spacing: 24) {
+            ZStack {
+                Circle()
+                    .stroke(Color.blue.opacity(0.1), lineWidth: 8)
+                    .frame(width: 80, height: 80)
+                
+                Circle()
+                    .trim(from: 0, to: generationProgress)
+                    .stroke(Color.blue, style: StrokeStyle(lineWidth: 8, lineCap: .round))
+                    .frame(width: 80, height: 80)
+                    .rotationEffect(.degrees(-90))
+                    .animation(.linear, value: generationProgress)
+                
+                Image(systemName: "brain.head.profile")
+                    .font(.title)
+                    .foregroundStyle(.blue)
+            }
+            
+            VStack(spacing: 8) {
+                Text("Generating Exam...")
+                    .font(.headline)
+                    .foregroundStyle(.primary)
+                
+                Text("\(Int(generationProgress * 100))%")
+                    .font(.subheadline)
+                    .monospacedDigit()
+                    .foregroundStyle(.secondary)
+            }
+            
             Text("Crafting questions from your vocabulary...")
                 .font(.caption)
                 .foregroundStyle(.tertiary)
@@ -413,6 +436,21 @@ struct ExamView: View {
     
     func generateQuestions() {
         isGenerating = true
+        generationProgress = 0.0
+        
+        // Simulate progress
+        Task {
+            for _ in 0..<90 {
+                if !isGenerating { break }
+                try? await Task.sleep(nanoseconds: 50_000_000) // 0.05s
+                await MainActor.run {
+                    if generationProgress < 0.9 {
+                        generationProgress += 0.01
+                    }
+                }
+            }
+        }
+        
         Task {
             // Pick random 5 words
             let shuffled = items.shuffled()
@@ -421,6 +459,11 @@ struct ExamView: View {
             
             do {
                 let newQuestions = try await generateExam(words: selected, session: session)
+                
+                await MainActor.run {
+                    self.generationProgress = 1.0
+                }
+                try? await Task.sleep(nanoseconds: 300_000_000) // Wait for 100% animation
                 
                 await MainActor.run {
                     self.questions = newQuestions
@@ -686,6 +729,18 @@ struct QuestionCard: View {
                         .fontWeight(.semibold)
                         .foregroundStyle(.green)
                 }
+            }
+            
+            if let explanation = question.explanation, !explanation.isEmpty {
+                Divider()
+                    .padding(.vertical, 4)
+                Text("Explanation")
+                    .font(.caption)
+                    .fontWeight(.bold)
+                    .foregroundStyle(.secondary)
+                Text(explanation)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
         }
         .padding()

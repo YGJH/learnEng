@@ -9,6 +9,8 @@ struct ControlPanel: View {
         ("Chat", "bubble.left.and.bubble.right.fill", "Chat"),
         ("Vocabulrary", "book.closed.fill", "Vocabulary"),
         ("Exam", "graduationcap.fill", "Exam"),
+        ("ScanExam", "doc.text.viewfinder", "Scan Exam"),
+        ("Writing", "pencil.and.outline", "Writing"),
         ("News", "newspaper.fill", "News"),
         ("Settings", "gearshape.fill", "Settings")
     ]

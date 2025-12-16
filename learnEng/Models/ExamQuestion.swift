@@ -16,6 +16,7 @@ struct GeneratedQuestion: Codable {
     let passage: String?
     let answer: Int?  // For multiple_choice/reading: 1, 2, 3, 4 (option index)
     let answerText: String?  // For fill_in_blank: the actual word
+    let explanation: String? // Explanation of the answer
 }
 
 // The UI-friendly version with UUID and QuestionType
@@ -27,6 +28,7 @@ struct ExamQuestion: Identifiable, Codable {
     let passage: String?
     let answer: Int?
     let answerText: String?
+    let explanation: String?
     
     // Computed property to get the actual QuestionType
     var questionType: QuestionType {
@@ -36,10 +38,21 @@ struct ExamQuestion: Identifiable, Codable {
     // Computed property to get the correct answer text
     var correctAnswerText: String {
         if questionType == .multipleChoice || questionType == .reading {
-            // For multiple choice, answer is the index (1-based)
+            // 1. Try standard 1-based index
             if let answer = answer, let options = options, answer > 0 && answer <= options.count {
                 return options[answer - 1]  // Convert 1-based to 0-based index
             }
+            
+            // 2. Handle 0-based index (if answer is 0)
+            if let answer = answer, let options = options, answer == 0 && options.count > 0 {
+                return options[0]
+            }
+            
+            // 3. Fallback: Check if answerText matches one of the options
+            if let answerText = answerText, let options = options, options.contains(answerText) {
+                return answerText
+            }
+            
             return "Invalid answer index"
         } else {
             // For fill_in_blank, use answerText
@@ -48,7 +61,7 @@ struct ExamQuestion: Identifiable, Codable {
     }
     
     enum CodingKeys: String, CodingKey {
-        case type, question, options, passage, answer, answerText
+        case type, question, options, passage, answer, answerText, explanation
     }
     
     // Initialize from GeneratedQuestion
@@ -60,6 +73,7 @@ struct ExamQuestion: Identifiable, Codable {
         self.passage = generated.passage
         self.answer = generated.answer
         self.answerText = generated.answerText
+        self.explanation = generated.explanation
     }  
     
     init(from decoder: Decoder) throws {
@@ -70,6 +84,7 @@ struct ExamQuestion: Identifiable, Codable {
         passage = try container.decodeIfPresent(String.self, forKey: .passage)
         answer = try container.decodeIfPresent(Int.self, forKey: .answer)
         answerText = try container.decodeIfPresent(String.self, forKey: .answerText)
+        explanation = try container.decodeIfPresent(String.self, forKey: .explanation)
     }
     
     func encode(to encoder: Encoder) throws {
@@ -80,6 +95,7 @@ struct ExamQuestion: Identifiable, Codable {
         try container.encode(passage, forKey: .passage)
         try container.encode(answer, forKey: .answer)
         try container.encode(answerText, forKey: .answerText)
+        try container.encode(explanation, forKey: .explanation)
     }
 }
 

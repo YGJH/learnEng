@@ -23,6 +23,9 @@ struct ContentView: View {
     @State var show_panel: Bool = false
     @State var selectedPage: String = "Chat"
     
+    @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding: Bool = false
+    @State private var showOnboarding = false
+    
     @State private var showMissingKeyAlert = false
     @State private var showQuotaAlert = false
     @AppStorage("geminiApiKey") private var geminiApiKey: String = ""
@@ -129,12 +132,18 @@ struct ContentView: View {
                         // Add padding for the floating button
                         Color.clear.frame(height: 60)
                         ExamView()
+                    } else if selectedPage == "ScanExam" {
+                        Color.clear.frame(height: 60)
+                        ScanExamView()
                     } else if selectedPage == "News" {
                         Color.clear.frame(height: 60)
                         NewsView()
                     } else if selectedPage == "Settings" {
                         Color.clear.frame(height: 60)
                         SettingsView()
+                    } else if selectedPage == "Writing" {
+                        Color.clear.frame(height: 60)
+                        WritingView()
                     } else {
                         // Add padding for the floating button
                         Color.clear.frame(height: 60)
@@ -178,10 +187,35 @@ struct ContentView: View {
                     .frame(width: show_panel ? 0.4 * proxy.size.width : 0, height: proxy.size.height, alignment: .topLeading)
                     .cornerRadius(20)
                     .zIndex(2)
+                
+                // Help Button (Top Right)
+                Button {
+                    showOnboarding = true
+                } label: {
+                    Image(systemName: "questionmark.circle")
+                        .font(.title2)
+                        .foregroundStyle(.secondary)
+                        .padding()
+                        .background(Color(uiColor: .systemBackground).opacity(0.8))
+                        .clipShape(Circle())
+                        .shadow(radius: 2)
+                }
+                .padding()
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+                .zIndex(1)
             }
             .frame(width: proxy.size.width, height: proxy.size.height)
         }
         .background(Color(.secondarySystemBackground))
+        .fullScreenCover(isPresented: $showOnboarding) {
+            OnboardingView(showOnboarding: $showOnboarding)
+        }
+        .onAppear {
+            if !hasSeenOnboarding {
+                showOnboarding = true
+                hasSeenOnboarding = true
+            }
+        }
         .alert("Gemini API Key Missing", isPresented: $showMissingKeyAlert) {
             Button("Use Local Model") {
                 selectedModel = "local"

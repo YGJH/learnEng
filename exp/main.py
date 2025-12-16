@@ -15,19 +15,46 @@ NEWS_JSON_FILE = Path(__file__).parent / "news.json"
 RSS_FEEDS = {
     "technology": [
         "https://www.wired.com/feed/rss",
-        "http://feeds.bbci.co.uk/news/technology/rss.xml"
+        "http://feeds.bbci.co.uk/news/technology/rss.xml",
+        "https://techcrunch.com/feed/",
+        "https://www.theverge.com/rss/index.xml"
     ],
     "business": [
         "http://feeds.bbci.co.uk/news/business/rss.xml",
-        "https://rss.nytimes.com/services/xml/rss/nyt/Business.xml"
+        "https://rss.nytimes.com/services/xml/rss/nyt/Business.xml",
+        "https://www.cnbc.com/id/10000664/device/rss/rss.html",
+        "https://feeds.a.dj.com/rss/WSJcomUSBusiness.xml"
     ],
     "world": [
         "http://feeds.bbci.co.uk/news/world/rss.xml",
-        "https://rss.nytimes.com/services/xml/rss/nyt/World.xml"
+        "https://rss.nytimes.com/services/xml/rss/nyt/World.xml",
+        "https://www.aljazeera.com/xml/rss/all.xml",
+        "http://rss.cnn.com/rss/edition_world.rss"
+    ],
+    "science": [
+        "https://www.sciencedaily.com/rss/top_news.xml",
+        "https://rss.nytimes.com/services/xml/rss/nyt/Science.xml",
+        "https://www.newscientist.com/feed/home"
+    ],
+    "health": [
+        "http://feeds.bbci.co.uk/news/health/rss.xml",
+        "https://rss.nytimes.com/services/xml/rss/nyt/Health.xml",
+        "https://www.medicalnewstoday.com/feed"
+    ],
+    "sports": [
+        "http://feeds.bbci.co.uk/sport/rss.xml",
+        "https://www.espn.com/espn/rss/news",
+        "https://rss.nytimes.com/services/xml/rss/nyt/Sports.xml"
+    ],
+    "entertainment": [
+        "https://www.variety.com/feed/",
+        "https://rss.nytimes.com/services/xml/rss/nyt/Movies.xml",
+        "https://www.hollywoodreporter.com/feed/"
     ],
     "general": [
         "http://feeds.bbci.co.uk/news/rss.xml",
-        "https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml"
+        "https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml",
+        "http://rss.cnn.com/rss/edition.rss"
     ]
 }
 
@@ -101,7 +128,7 @@ def get_cached_news():
         )
 
 @app.get("/news")
-def get_all_news(category: Optional[str] = None, limit: int = 50, use_cache: bool = False):
+def get_all_news(category: Optional[str] = None, limit: int = 100, use_cache: bool = False):
     """
     獲取新聞的 Endpoint
     - category: technology, business, world, general (如果不指定則抓取所有類別)

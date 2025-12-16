@@ -775,7 +775,8 @@ func generateExam(words: [String], session: LanguageModelSession) async throws -
                             options: question.options,
                             passage: question.passage,
                             answer: newAnswer,
-                            answerText: question.answerText
+                            answerText: question.answerText,
+                            explanation: question.explanation
                         )
                     }
                 }
@@ -789,6 +790,61 @@ func generateExam(words: [String], session: LanguageModelSession) async throws -
         
         return allQuestions
     }
+}
+
+func generateExamFromText(_ text: String, session: LanguageModelSession) async throws -> [ExamQuestion] {
+    let prompt = """
+    Analyze the following text extracted from an exam paper image.
+    Identify the questions, options (if any), and correct answers (if inferable, otherwise leave blank or mark as unknown).
+    Format the output as a JSON object matching the ExamData structure.
+    
+    Text:
+    \(text)
+    
+    Requirements:
+    1. Identify multiple choice questions, fill-in-the-blank questions, or reading comprehension questions.
+    2. For multiple choice, provide options.
+    3. If the answer key is not in the text, try to solve it yourself and provide the correct answer.
+    4. Provide a detailed explanation for why the answer is correct, suitable for a student learning English.
+    """
+    
+    let response = try await session.respond(to: prompt, generating: ExamData.self)
+    
+    // Post-process to fix common LLM errors (0-based index, out of bounds)
+    var validQuestions: [ExamQuestion] = []
+    for var q in response.content.questions {
+        // Fix 0-based index
+        if let answer = q.answer, answer == 0 {
+            q = GeneratedQuestion(
+                type: q.type,
+                question: q.question,
+                options: q.options,
+                passage: q.passage,
+                answer: 1,
+                answerText: q.answerText,
+                explanation: q.explanation
+            )
+        }
+        
+        // Fix out of bounds index by checking answerText
+        if let answer = q.answer, let options = q.options, answer > options.count {
+            if let text = q.answerText, let idx = options.firstIndex(of: text) {
+                q = GeneratedQuestion(
+                    type: q.type,
+                    question: q.question,
+                    options: q.options,
+                    passage: q.passage,
+                    answer: idx + 1,
+                    answerText: q.answerText,
+                    explanation: q.explanation
+                )
+            }
+        }
+        
+        validQuestions.append(ExamQuestion(from: q))
+    }
+    
+    return validQuestions
 }
 
 @Generable

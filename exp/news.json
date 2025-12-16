@@ -1,7 +1,47 @@
 {
-  "count": 50,
+  "count": 100,
   "category": "all",
   "articles": [
+    {
+      "title": "American Giant Redesigns Its Iconic Classic Full Zip Hoodie",
+      "link": "https://www.wired.com/story/american-giant-redesign-classic-full-zip-hoodie/",
+      "summary": "The refreshed Classic Full Zip hoodie uses a softer cotton fleece, but it’s still US-made. It’s the first major overhaul of American Giant’s most well-loved sweatshirt.",
+      "source": "WIRED",
+      "published_at": "Tue, 16 Dec 2025 14:00:00 +0000",
+      "category": "technology"
+    },
+    {
+      "title": "16 Best White Elephant Gifts (2025): Coffee Pot Mug, Legos, Sushi Magnets, and More",
+      "link": "https://www.wired.com/gallery/best-white-elephant-gifts-2025/",
+      "summary": "Bring the gift everyone will want to win from this year's holiday party, from a cute jacket for a beer can to magnets they'll wish they could eat.",
+      "source": "WIRED",
+      "published_at": "Tue, 16 Dec 2025 13:36:00 +0000",
+      "category": "technology"
+    },
+    {
+      "title": "15 Best Office Chairs of 2025— I’ve Tested Nearly 60 to Pick Them",
+      "link": "https://www.wired.com/gallery/best-office-chairs/",
+      "summary": "Sitting at a desk for hours? Upgrade your WFH setup and work in style with these comfy WIRED-tested seats.",
+      "source": "WIRED",
+      "published_at": "Tue, 16 Dec 2025 13:00:00 +0000",
+      "category": "technology"
+    },
+    {
+      "title": "9 Best Electric Scooters (2025), Tested and Reviewed",
+      "link": "https://www.wired.com/gallery/best-electric-scooters/",
+      "summary": "These WIRED-tested two-wheelers will help you scoot scoot scoot around town.",
+      "source": "WIRED",
+      "published_at": "Tue, 16 Dec 2025 12:30:00 +0000",
+      "category": "technology"
+    },
+    {
+      "title": "Aluminium OS: Everything We Know About the Chromebook Successor",
+      "link": "https://www.wired.com/story/google-aluminium-os-chromebook-successor-is-coming/",
+      "summary": "Google has officially acknowledged the upcoming merger of Android and Chromebooks, and it may be coming in 2026.",
+      "source": "WIRED",
+      "published_at": "Tue, 16 Dec 2025 12:00:00 +0000",
+      "category": "technology"
+    },
     {
       "title": "AWS CEO Matt Garman Doesn’t Think AI Should Replace Junior Devs",
       "link": "https://www.wired.com/story/the-big-interview-podcast-matt-garman-ceo-aws/",
@@ -363,45 +403,405 @@
       "category": "technology"
     },
     {
-      "title": "People Are Already Taking This Unapproved New Weight-Loss Drug",
-      "link": "https://www.wired.com/story/people-are-already-taking-this-unapproved-new-weight-loss-drug-triple-g-retatrutide/",
-      "summary": "Retatrutide, originally developed by Eli Lilly, has found a loyal fan base—even though clinical trials of the drug still haven’t finished.",
-      "source": "WIRED",
-      "published_at": "Fri, 12 Dec 2025 11:30:00 +0000",
+      "title": "Negotiations over US-UK tech deal stall",
+      "link": "https://www.bbc.com/news/articles/c79x54dprngo?at_medium=RSS&at_campaign=rss",
+      "summary": "When the partnership was unveiled in September the UK government said it would \"shape the futures of millions of people\"",
+      "source": "BBC News",
+      "published_at": "Tue, 16 Dec 2025 13:42:57 GMT",
       "category": "technology"
     },
     {
-      "title": "The Best Meteor Shower of the Year Is Coming—Here’s How to Watch",
-      "link": "https://www.wired.com/story/how-to-watch-the-geminids-meteor-shower/",
-      "summary": "The highlight of the year, the Geminids are the most active and colorful meteor shower, offering the chance to see hundreds of shooting stars every hour when they peak in mid-December.",
-      "source": "WIRED",
-      "published_at": "Fri, 12 Dec 2025 10:00:00 +0000",
+      "title": "UK launches taskforce to 'break down barriers' for women in technology",
+      "link": "https://www.bbc.com/news/articles/cg7vez25ly5o?at_medium=RSS&at_campaign=rss",
+      "summary": "It comes after the government was urged to help close the UK tech sector's gender gap in order to meet its ambitious AI goals.",
+      "source": "BBC News",
+      "published_at": "Tue, 16 Dec 2025 00:04:18 GMT",
       "category": "technology"
     },
     {
-      "title": "Evolved Novelties Pleasure Puff Inflatable Rabbit Review: A-Spot Stimulation",
-      "link": "https://www.wired.com/review/evolved-novelties-pleasure-puff-inflatable-rabbit/",
-      "summary": "If A-spot stimulation doesn't mean much to you, the Pleasure Puff likely won't excite.",
-      "source": "WIRED",
-      "published_at": "Fri, 12 Dec 2025 09:00:00 +0000",
+      "title": "Amazon apologises after showing 15-rated film to child who rented PG movie",
+      "link": "https://www.bbc.com/news/articles/cy4xwv7vdmdo?at_medium=RSS&at_campaign=rss",
+      "summary": "The child was trying to watch Diary of a Wimpy Kid - but a film with \"strong sex and sex references\" played instead.",
+      "source": "BBC News",
+      "published_at": "Mon, 15 Dec 2025 13:52:12 GMT",
       "category": "technology"
     },
     {
-      "title": "B&H Photo Promo Codes and Deals for December 2025",
-      "link": "https://www.wired.com/story/bh-photo-coupon/",
-      "summary": "Enjoy top deals on cameras, computers, and tech essentials at B&amp;H Photo.",
-      "source": "WIRED",
-      "published_at": "Fri, 12 Dec 2025 06:10:00 +0000",
+      "title": "Ofcom investigates BT and Three for failing to connect 999 calls",
+      "link": "https://www.bbc.com/news/articles/c5y2kgdq6r3o?at_medium=RSS&at_campaign=rss",
+      "summary": "The companies have been fined in the past over outages leaving customers unable to call emergency services.",
+      "source": "BBC News",
+      "published_at": "Mon, 15 Dec 2025 11:41:43 GMT",
       "category": "technology"
     },
     {
-      "title": "Factor Promo Code: Up to $130 Off Meal Prep",
-      "link": "https://www.wired.com/story/factor-promo-code/",
-      "summary": "Make meal prep easier for any dietary need while enjoying great savings with our hand-picked Factor discount codes this December.",
-      "source": "WIRED",
-      "published_at": "Fri, 12 Dec 2025 06:00:00 +0000",
+      "title": "Grand Theft Auto game creator sacked us for trying to unionise",
+      "link": "https://www.bbc.com/news/articles/cp89990rgdno?at_medium=RSS&at_campaign=rss",
+      "summary": "Former staff at the Grand Theft Auto creator are seeking an employment tribunal over alleged \"union-busting\".",
+      "source": "BBC News",
+      "published_at": "Mon, 15 Dec 2025 10:21:43 GMT",
+      "category": "technology"
+    },
+    {
+      "title": "Roomba vacuum cleaner firm files for bankruptcy",
+      "link": "https://www.bbc.com/news/articles/c1lr75lp239o?at_medium=RSS&at_campaign=rss",
+      "summary": "Under the so-called pre-packaged Chapter 11 process, the main maker of its devices will take ownership of the firm.",
+      "source": "BBC News",
+      "published_at": "Mon, 15 Dec 2025 07:47:31 GMT",
+      "category": "technology"
+    },
+    {
+      "title": "What's next for TikTok in the US as deal prospects remain uncertain?",
+      "link": "https://www.bbc.com/news/articles/cp34442z25ko?at_medium=RSS&at_campaign=rss",
+      "summary": "A deal to sell TikTok has remained elusive, despite earlier claims that a deal was done.",
+      "source": "BBC News",
+      "published_at": "Mon, 15 Dec 2025 17:06:41 GMT",
+      "category": "technology"
+    },
+    {
+      "title": "Amazon pulls AI recap from Fallout TV show after it made several mistakes",
+      "link": "https://www.bbc.com/news/articles/c3r77j5nze5o?at_medium=RSS&at_campaign=rss",
+      "summary": "The errors included getting dialogue wrong and incorrectly claiming a scene was set 100 years earlier than it was.",
+      "source": "BBC News",
+      "published_at": "Fri, 12 Dec 2025 18:04:47 GMT",
+      "category": "technology"
+    },
+    {
+      "title": "Online gaming escaped Australia's social media ban - but critics say it's just as addictive",
+      "link": "https://www.bbc.com/news/articles/c93w90kqgv9o?at_medium=RSS&at_campaign=rss",
+      "summary": "Parents and experts say gaming poses many of the same risks for kids as social media, and want them included.",
+      "source": "BBC News",
+      "published_at": "Fri, 12 Dec 2025 20:45:06 GMT",
+      "category": "technology"
+    },
+    {
+      "title": "Creative industries 'incredibly worried' about OpenAI-Disney deal",
+      "link": "https://www.bbc.com/news/articles/c5ydp1gdqwqo?at_medium=RSS&at_campaign=rss",
+      "summary": "The $1bn deal will let fans generate videos and images of more than 200 Disney characters on ChatGPT and Sora.",
+      "source": "BBC News",
+      "published_at": "Fri, 12 Dec 2025 11:46:00 GMT",
+      "category": "technology"
+    },
+    {
+      "title": "Clair Obscur sweeps The Game Awards with nine wins",
+      "link": "https://www.bbc.com/news/articles/c1kpwmezkpdo?at_medium=RSS&at_campaign=rss",
+      "summary": "The French-made role-playing game is named game of the year on a night of prizes and announcements.",
+      "source": "BBC News",
+      "published_at": "Fri, 12 Dec 2025 10:45:37 GMT",
+      "category": "technology"
+    },
+    {
+      "title": "Trump signs order to block states from enforcing own AI rules",
+      "link": "https://www.bbc.com/news/articles/crmddnge9yro?at_medium=RSS&at_campaign=rss",
+      "summary": "California's governor Gavin Newsom issued a strongly-worded statement in response to the executive order.",
+      "source": "BBC News",
+      "published_at": "Fri, 12 Dec 2025 15:02:57 GMT",
+      "category": "technology"
+    },
+    {
+      "title": "Google asks UK experts to find uses for its powerful quantum tech",
+      "link": "https://www.bbc.com/news/articles/c2epm0w0zggo?at_medium=RSS&at_campaign=rss",
+      "summary": "UK researchers will get a chance to develop applications for the tech giant's quantum processor.",
+      "source": "BBC News",
+      "published_at": "Fri, 12 Dec 2025 00:34:11 GMT",
+      "category": "technology"
+    },
+    {
+      "title": "Crypto fraudster sentenced for 'epic' $40bn stablecoin crash",
+      "link": "https://www.bbc.com/news/articles/ckgmm92d213o?at_medium=RSS&at_campaign=rss",
+      "summary": "In August, Do Kwon pleaded guilty to conspiracy to defraud and wire fraud and apologised for his actions.",
+      "source": "BBC News",
+      "published_at": "Fri, 12 Dec 2025 00:21:41 GMT",
+      "category": "technology"
+    },
+    {
+      "title": "Reddit launches High Court challenge to Australia's social media ban for kids",
+      "link": "https://www.bbc.com/news/articles/clykk2yrl9ko?at_medium=RSS&at_campaign=rss",
+      "summary": "It said the landmark policy has serious implications for Australians' privacy and political rights.",
+      "source": "BBC News",
+      "published_at": "Fri, 12 Dec 2025 00:02:02 GMT",
+      "category": "technology"
+    },
+    {
+      "title": "'Architects of AI' named Time Magazine's Person of the Year",
+      "link": "https://www.bbc.com/news/articles/cly01mdm577o?at_medium=RSS&at_campaign=rss",
+      "summary": "Nvidia boss Jensen Huang is among the influential tech figures that adorn one of the two covers.",
+      "source": "BBC News",
+      "published_at": "Thu, 11 Dec 2025 13:52:11 GMT",
+      "category": "technology"
+    },
+    {
+      "title": "Porn company starts new age checks after £1m Ofcom fine",
+      "link": "https://www.bbc.com/news/articles/c0mpx9yn831o?at_medium=RSS&at_campaign=rss",
+      "summary": "The media regulator Ofcom said AVS Group Ltd had started age checks on some of its porn websites.",
+      "source": "BBC News",
+      "published_at": "Wed, 10 Dec 2025 14:05:23 GMT",
+      "category": "technology"
+    },
+    {
+      "title": "Oracle shares slide as earnings fail to ease AI bubble fears",
+      "link": "https://www.bbc.com/news/articles/c9qe1e374l1o?at_medium=RSS&at_campaign=rss",
+      "summary": "The cloud computing giant's revenue miss renews questions about its financial health.",
+      "source": "BBC News",
+      "published_at": "Thu, 11 Dec 2025 16:24:20 GMT",
+      "category": "technology"
+    },
+    {
+      "title": "McDonald's Netherlands pulls AI Christmas ad after backlash",
+      "link": "https://www.bbc.com/news/articles/czdgrnvp082o?at_medium=RSS&at_campaign=rss",
+      "summary": "McDonald's said the moment served as \"an important learning\" as it explored \"the effective use of AI\".",
+      "source": "BBC News",
+      "published_at": "Wed, 10 Dec 2025 12:14:14 GMT",
+      "category": "technology"
+    },
+    {
+      "title": "People spending even more time online now than during the pandemic",
+      "link": "https://www.bbc.com/news/articles/c39prelx2mxo?at_medium=RSS&at_campaign=rss",
+      "summary": "The survey found people in the UK spent on average four hours and 30 minutes online every day in 2025",
+      "source": "BBC News",
+      "published_at": "Wed, 10 Dec 2025 00:04:38 GMT",
+      "category": "technology"
+    },
+    {
+      "title": "Kids locked out of social media apps after Australia's world-first ban",
+      "link": "https://www.bbc.com/news/articles/cgl6gkd7pz6o?at_medium=RSS&at_campaign=rss",
+      "summary": "The new law requires tech platforms to ensure that Australians aged under 16 don't hold accounts.",
+      "source": "BBC News",
+      "published_at": "Wed, 10 Dec 2025 05:05:52 GMT",
+      "category": "technology"
+    },
+    {
+      "title": "Amazon, Microsoft pledge mega AI investments in India",
+      "link": "https://www.bbc.com/news/articles/c3w79pgn8peo?at_medium=RSS&at_campaign=rss",
+      "summary": "India, which is an emerging AI and cloud infrastructure hub, has witnessed a surge of global tech investment recently.",
+      "source": "BBC News",
+      "published_at": "Wed, 10 Dec 2025 07:50:12 GMT",
+      "category": "technology"
+    },
+    {
+      "title": "The Swiss city that lets you pay for most things with bitcoin",
+      "link": "https://www.bbc.com/news/articles/c0r959n91p4o?at_medium=RSS&at_campaign=rss",
+      "summary": "Shops, restaurants and even the local council in Lugano now accept the cryptocurrency.",
+      "source": "BBC News",
+      "published_at": "Thu, 11 Dec 2025 00:22:58 GMT",
+      "category": "technology"
+    },
+    {
+      "title": "Google unveils plans to try again with smart glasses in 2026",
+      "link": "https://www.bbc.com/news/articles/cwyx83n00k6o?at_medium=RSS&at_campaign=rss",
+      "summary": "It is a significant turnaround for the tech giant after its first attempt - Google Glass - was pulled in 2015.",
+      "source": "BBC News",
+      "published_at": "Tue, 09 Dec 2025 16:34:53 GMT",
+      "category": "technology"
+    },
+    {
+      "title": "EU investigates Google over AI-generated summaries in search results",
+      "link": "https://www.bbc.com/news/articles/crl95eg33k1o?at_medium=RSS&at_campaign=rss",
+      "summary": "It is examining whether the tech giant did not offer \"appropriate compensation\" to web publishers.",
+      "source": "BBC News",
+      "published_at": "Tue, 09 Dec 2025 13:24:15 GMT",
+      "category": "technology"
+    },
+    {
+      "title": "Trump gives Nvidia green light to sell advanced AI chips to China",
+      "link": "https://www.bbc.com/news/articles/ckg9q635q6po?at_medium=RSS&at_campaign=rss",
+      "summary": "Nvidia had been at the centre of a geopolitical tug-of-war between the US and China in recent months.",
+      "source": "BBC News",
+      "published_at": "Tue, 09 Dec 2025 02:13:58 GMT",
+      "category": "technology"
+    },
+    {
+      "title": "Elon Musk's X bans European Commission from making ads after €120m fine",
+      "link": "https://www.bbc.com/news/articles/c0589g0dqq7o?at_medium=RSS&at_campaign=rss",
+      "summary": "The EU regulator had fined the social media platform over its \"deceptive\" blue tick badges.",
+      "source": "BBC News",
+      "published_at": "Mon, 08 Dec 2025 12:19:21 GMT",
+      "category": "technology"
+    },
+    {
+      "title": "Is AI in recruitment a 'race to the bottom'?",
+      "link": "https://www.bbc.com/news/articles/ced6jv76091o?at_medium=RSS&at_campaign=rss",
+      "summary": "AI helps jobseekers to apply for hundreds of roles, meanwhile employers use AI to filter them.",
+      "source": "BBC News",
+      "published_at": "Tue, 09 Dec 2025 00:10:31 GMT",
+      "category": "technology"
+    },
+    {
+      "title": "Japan is facing a dementia crisis – can technology help?",
+      "link": "https://www.bbc.com/news/articles/c4g9e34yzvgo?at_medium=RSS&at_campaign=rss",
+      "summary": "Elderly people aged 65 and over now make up nearly 30% of Japan's population.",
+      "source": "BBC News",
+      "published_at": "Mon, 08 Dec 2025 00:49:01 GMT",
+      "category": "technology"
+    },
+    {
+      "title": "Trump says $72bn Netflix-Warner Bros deal 'could be a problem'",
+      "link": "https://www.bbc.com/news/articles/cn815egjqjpo?at_medium=RSS&at_campaign=rss",
+      "summary": "The planned deal would cement Netflix in its position as the world's biggest subscription streaming service.",
+      "source": "BBC News",
+      "published_at": "Mon, 08 Dec 2025 10:44:44 GMT",
+      "category": "technology"
+    },
+    {
+      "title": "Porn site fined £1m over age checks has never responded to Ofcom",
+      "link": "https://www.bbc.com/news/articles/c93nll07z3go?at_medium=RSS&at_campaign=rss",
+      "summary": "The regulator tells the BBC it has been emailing AVS Group Ltd without reply since July.",
+      "source": "BBC News",
+      "published_at": "Thu, 04 Dec 2025 11:10:10 GMT",
+      "category": "technology"
+    },
+    {
+      "title": "US hits out at EU's 'suffocating regulations' after it fines Elon Musk's X",
+      "link": "https://www.bbc.com/news/articles/c4g9kejzvw0o?at_medium=RSS&at_campaign=rss",
+      "summary": "The European Commission says the social media site is opening its users up to scams and impersonations.",
+      "source": "BBC News",
+      "published_at": "Fri, 05 Dec 2025 17:58:27 GMT",
+      "category": "technology"
+    },
+    {
+      "title": "Meet the biggest heat pumps in the world",
+      "link": "https://www.bbc.com/news/articles/c17p44w87rno?at_medium=RSS&at_campaign=rss",
+      "summary": "Across Europe huge heat pumps are being installed that can heat tens of thousands of homes.",
+      "source": "BBC News",
+      "published_at": "Tue, 16 Dec 2025 00:06:44 GMT",
+      "category": "technology"
+    },
+    {
+      "title": "Watch Australian teens test out social media on first day of ban",
+      "link": "https://www.bbc.com/news/videos/c3e0p8jj84lo?at_medium=RSS&at_campaign=rss",
+      "summary": "Teenagers affected by Australia's under-16 social media ban showed the BBC what happened when they tried to access their accounts.",
+      "source": "BBC News",
+      "published_at": "Wed, 10 Dec 2025 04:38:55 GMT",
+      "category": "technology"
+    },
+    {
+      "title": "Tech Life",
+      "link": "https://www.bbc.co.uk/sounds/play/w3ct6zpt?at_medium=RSS&at_campaign=rss",
+      "summary": "A popular streamer tells us about the downsides of making online content.",
+      "source": "BBC News",
+      "published_at": "Tue, 09 Dec 2025 20:30:00 GMT",
+      "category": "technology"
+    },
+    {
+      "title": "The unexpected history of those oh-so annoying internet popup ads",
+      "link": "https://www.bbc.com/news/videos/c9w71g22nw2o?at_medium=RSS&at_campaign=rss",
+      "summary": "Ethan Zuckerman says his intentions were good when he invented the ads.",
+      "source": "BBC News",
+      "published_at": "Sun, 07 Dec 2025 06:00:33 GMT",
+      "category": "technology"
+    },
+    {
+      "title": "Tech Now",
+      "link": "https://www.bbc.co.uk/iplayer/episode/m002ndlb?at_medium=RSS&at_campaign=rss",
+      "summary": "Nick Kwek visits the National Space Industry Hub in Sydney.",
+      "source": "BBC News",
+      "published_at": "Sat, 06 Dec 2025 01:00:18 GMT",
+      "category": "technology"
+    },
+    {
+      "title": "Tech Life",
+      "link": "https://www.bbc.co.uk/sounds/play/w3ct6zps?at_medium=RSS&at_campaign=rss",
+      "summary": "How AI is used in songwriting and fashion. Plus, a warning on how it’s used in toys.",
+      "source": "BBC News",
+      "published_at": "Tue, 02 Dec 2025 20:30:00 GMT",
+      "category": "technology"
+    },
+    {
+      "title": "Tech Now",
+      "link": "https://www.bbc.co.uk/iplayer/episode/m002n4hn?at_medium=RSS&at_campaign=rss",
+      "summary": "Adrienne Murray meets the engineers designing icebreaker ship technology for the Arctic.",
+      "source": "BBC News",
+      "published_at": "Sat, 29 Nov 2025 01:00:00 GMT",
+      "category": "technology"
+    },
+    {
+      "title": "Tech Life",
+      "link": "https://www.bbc.co.uk/sounds/play/w3ct6zpr?at_medium=RSS&at_campaign=rss",
+      "summary": "Some children in the United States are learning with help from AI-powered apps at school.",
+      "source": "BBC News",
+      "published_at": "Tue, 25 Nov 2025 20:50:00 GMT",
+      "category": "technology"
+    },
+    {
+      "title": "Tech Now",
+      "link": "https://www.bbc.co.uk/iplayer/episode/m002mt7t?at_medium=RSS&at_campaign=rss",
+      "summary": "The scientists on a quest to improve our predictions of global sea level rise.",
+      "source": "BBC News",
+      "published_at": "Sat, 22 Nov 2025 01:00:00 GMT",
+      "category": "technology"
+    },
+    {
+      "title": "Tech Life",
+      "link": "https://www.bbc.co.uk/sounds/play/w3ct6zpq?at_medium=RSS&at_campaign=rss",
+      "summary": "Who are digital nomads, and why are more countries welcoming them ?",
+      "source": "BBC News",
+      "published_at": "Tue, 18 Nov 2025 20:30:00 GMT",
+      "category": "technology"
+    },
+    {
+      "title": "'It's amazing' – the wonder material very few can make",
+      "link": "https://www.bbc.com/news/articles/c24l223d9n7o?at_medium=RSS&at_campaign=rss",
+      "summary": "Just a handful of companies can make cadmium zinc telluride, a material with powerful properties.",
+      "source": "BBC News",
+      "published_at": "Fri, 12 Dec 2025 00:03:10 GMT",
+      "category": "technology"
+    },
+    {
+      "title": "Will boats be a breakthrough for 3D printing tech?",
+      "link": "https://www.bbc.com/news/articles/c751xw96e9yo?at_medium=RSS&at_campaign=rss",
+      "summary": "Dutch firms are betting that hulls made with 3D printing machines will mean cheaper boats.",
+      "source": "BBC News",
+      "published_at": "Fri, 28 Nov 2025 00:10:39 GMT",
+      "category": "technology"
+    },
+    {
+      "title": "Scammers hacked her phone and stole thousands - so how did they get her details?",
+      "link": "https://www.bbc.com/news/articles/czrk7gxk2l6o?at_medium=RSS&at_campaign=rss",
+      "summary": "Sue Shore told the BBC how scammers targeted her - and we found her information had been leaked online.",
+      "source": "BBC News",
+      "published_at": "Tue, 25 Nov 2025 04:58:08 GMT",
+      "category": "technology"
+    },
+    {
+      "title": "The entrepreneur connecting tourists to African hospitality",
+      "link": "https://www.bbc.com/news/videos/cvgkerq52p4o?at_medium=RSS&at_campaign=rss",
+      "summary": "TripZapp founder Rory Okoli wants to make it simple for tourists to book and pay for African travel.",
+      "source": "BBC News",
+      "published_at": "Tue, 25 Nov 2025 00:02:30 GMT",
+      "category": "technology"
+    },
+    {
+      "title": "The contradiction at the heart of the trillion-dollar AI race",
+      "link": "https://www.bbc.com/news/articles/cvgvynlxqdyo?at_medium=RSS&at_campaign=rss",
+      "summary": "The confusing question lingering over the AI hype is whether it could be a bubble at risk of bursting",
+      "source": "BBC News",
+      "published_at": "Wed, 19 Nov 2025 13:52:41 GMT",
+      "category": "technology"
+    },
+    {
+      "title": "On the front line of Europe's standoff with Russia's sanction-busting shadow fleet",
+      "link": "https://www.bbc.com/news/articles/cz91dk0l50no?at_medium=RSS&at_campaign=rss",
+      "summary": "With Europe imposing sanctions on Moscow, there has been a growing network of vessels sailing without a valid flag from Russia through European waters.",
+      "source": "BBC News",
+      "published_at": "Wed, 19 Nov 2025 00:23:14 GMT",
+      "category": "technology"
+    },
+    {
+      "title": "Can technology fix fashion's sizing crisis?",
+      "link": "https://www.bbc.com/news/articles/cjekg1pd9j4o?at_medium=RSS&at_campaign=rss",
+      "summary": "The BBC looks into whether artificial intelligence (AI) can help people who struggle when clothes are oddly sized.",
+      "source": "BBC News",
+      "published_at": "Sat, 15 Nov 2025 04:03:27 GMT",
+      "category": "technology"
+    },
+    {
+      "title": "Call of Duty is back, and it's got a battle on its hands",
+      "link": "https://www.bbc.com/news/articles/cy9pwgqvr7go?at_medium=RSS&at_campaign=rss",
+      "summary": "The annual instalment of the massive series faces new challenges from competitor Battlefield 6.",
+      "source": "BBC News",
+      "published_at": "Fri, 14 Nov 2025 15:47:29 GMT",
       "category": "technology"
     }
   ],
-  "fetched_at": "2025-12-16T19:44:54.386148"
+  "fetched_at": "2025-12-16T22:26:05.421751"
 }
