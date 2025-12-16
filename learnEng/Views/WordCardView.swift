@@ -32,10 +32,20 @@ struct WordCardView: View {
             // Header: Word, IPA, POS, Save Button
             HStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(card.word ?? query)
-                        .font(.title)
-                        .fontWeight(.bold)
-                        .foregroundStyle(.primary)
+                    HStack(alignment: .center, spacing: 8) {
+                        Text(card.word ?? query)
+                            .font(.title)
+                            .fontWeight(.bold)
+                            .foregroundStyle(.primary)
+                        
+                        Button {
+                            SpeechSynthesizer.shared.speak(card.word ?? query)
+                        } label: {
+                            Image(systemName: "speaker.wave.2.circle.fill")
+                                .font(.title2)
+                                .foregroundStyle(.blue)
+                        }
+                    }
                     
                     HStack(spacing: 8) {
                         if let ipa = card.ipa {

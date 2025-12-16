@@ -19,39 +19,16 @@ struct NewsView: View {
         ("world", "World", "globe.americas.fill")
     ]
     
+    @Namespace private var animation
+    
     var body: some View {
         NavigationStack {
-            Group {
+            ZStack {
+                Color(.systemGroupedBackground)
+                    .ignoresSafeArea()
+                
                 if isLoading {
-                    VStack(spacing: 24) {
-                        ZStack {
-                            Circle()
-                                .stroke(
-                                    LinearGradient(
-                                        colors: [.blue, .purple],
-                                        startPoint: .topLeading,
-                                        endPoint: .bottomTrailing
-                                    ),
-                                    lineWidth: 3
-                                )
-                                .frame(width: 60, height: 60)
-                            
-                            ProgressView()
-                                .scaleEffect(1.5)
-                                .tint(.blue)
-                        }
-                        
-                        VStack(spacing: 8) {
-                            Text("Loading Latest News")
-                                .font(.title3)
-                                .fontWeight(.semibold)
-                            
-                            Text("Fetching articles from sources...")
-                                .font(.subheadline)
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-                    .frame(maxHeight: .infinity)
+                    LoadingView()
                 } else if let error = errorMessage {
                     ContentUnavailableView(
                         "Failed to Load News",
@@ -67,161 +44,94 @@ struct NewsView: View {
                     }
                 } else if !articlesWithAI.isEmpty || isGeneratingSummaries {
                     ScrollView {
-                        LazyVStack(spacing: 20) {
-                            // Hero Header with Gradient
-                            ZStack(alignment: .bottomLeading) {
-                                LinearGradient(
-                                    colors: [.blue, .purple],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                )
-                                .frame(height: 180)
-                                .clipShape(
-                                    .rect(
-                                        topLeadingRadius: 0,
-                                        bottomLeadingRadius: 30,
-                                        bottomTrailingRadius: 30,
-                                        topTrailingRadius: 0
-                                    )
-                                )
-                                
-                                VStack(alignment: .leading, spacing: 8) {
-                                    HStack {
-                                        Image(systemName: isGeneratingSummaries ? "sparkles" : "checkmark.circle.fill")
-                                            .font(.title2)
-                                        Text(selectedCategory.capitalized)
-                                            .font(.largeTitle)
-                                            .fontWeight(.bold)
-                                    }
-                                    
-                                    HStack(spacing: 8) {
-                                        if isGeneratingSummaries {
-                                            Text("\(articlesWithAI.count) articles loading...")
-                                                .font(.subheadline)
-                                                .opacity(0.9)
-                                        } else {
-                                            Text("\(articlesWithAI.count) articles • AI Filtered")
-                                                .font(.subheadline)
-                                                .opacity(0.9)
-                                        }
-                                    }
-                                }
-                                .foregroundStyle(.white)
-                                .padding(24)
-                            }
+                        LazyVStack(spacing: 24) {
+                            // Header Space
+                            Color.clear.frame(height: 10)
                             
-                            // Initial Loading State (when no articles yet)
-                            if articlesWithAI.isEmpty && isGeneratingSummaries {
-                                VStack(spacing: 16) {
-                                    ProgressView()
-                                        .scaleEffect(1.2)
-                                        .padding(.top, 40)
-                                    
-                                    Text("Analyzing articles with AI...")
-                                        .font(.subheadline)
-                                        .foregroundStyle(.secondary)
-                                    
-                                    if let response = newsResponse {
-                                        Text("Processing \(response.count) articles")
-                                            .font(.caption)
-                                            .foregroundStyle(.tertiary)
-                                    }
-                                }
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 60)
-                            }
-                            
-                            // Featured Article (First one with larger card)
+                            // Featured Article (First one)
                             if let firstArticle = articlesWithAI.first {
                                 VStack(alignment: .leading, spacing: 12) {
-                                    Text("FEATURED")
-                                        .font(.caption)
-                                        .fontWeight(.bold)
-                                        .foregroundStyle(.blue)
-                                        .padding(.horizontal, 20)
+                                    HStack {
+                                        Image(systemName: "star.fill")
+                                            .foregroundStyle(.yellow)
+                                        Text("FEATURED STORY")
+                                            .font(.caption)
+                                            .fontWeight(.bold)
+                                            .foregroundStyle(.secondary)
+                                            .tracking(1)
+                                    }
+                                    .padding(.horizontal, 20)
                                     
-                                    FeaturedNewsCard(article: firstArticle, onTap: {
+                                    FeaturedNewsCard(article: firstArticle) {
                                         selectedArticle = firstArticle
-                                    })
+                                    }
+                                    .transition(.scale.combined(with: .opacity))
                                 }
                             }
                             
                             // Other Articles
                             if articlesWithAI.count > 1 {
-                                VStack(alignment: .leading, spacing: 12) {
-                                    Text("LATEST NEWS")
-                                        .font(.caption)
-                                        .fontWeight(.bold)
-                                        .foregroundStyle(.secondary)
-                                        .padding(.horizontal, 20)
-                                        .padding(.top, 8)
+                                VStack(alignment: .leading, spacing: 16) {
+                                    HStack {
+                                        Image(systemName: "clock.fill")
+                                            .foregroundStyle(.blue)
+                                        Text("LATEST UPDATES")
+                                            .font(.caption)
+                                            .fontWeight(.bold)
+                                            .foregroundStyle(.secondary)
+                                            .tracking(1)
+                                    }
+                                    .padding(.horizontal, 20)
+                                    .padding(.top, 8)
                                     
-                                    ForEach(articlesWithAI.dropFirst()) { article in
-                                        NewsArticleCard(article: article, onTap: {
+                                    ForEach(Array(articlesWithAI.dropFirst().enumerated()), id: \.element.id) { index, article in
+                                        NewsArticleCard(article: article, index: index) {
                                             selectedArticle = article
-                                        }) 
+                                        }
                                     }
                                 }
                             }
                             
-                            // Processing Indicator (顯示在底部)
-                            if isGeneratingSummaries, let response = newsResponse {
-                                VStack(spacing: 16) {
-                                    Divider()
-                                        .padding(.horizontal, 20)
-                                    
-                                    HStack(spacing: 12) {
-                                        ProgressView()
-                                            .scaleEffect(0.8)
-                                        
-                                        VStack(alignment: .leading, spacing: 4) {
-                                            HStack(spacing: 6) {
-                                                Image(systemName: "sparkles")
-                                                    .font(.caption)
-                                                    .foregroundStyle(.purple)
-                                                Text("AI Processing News...")
-                                                    .font(.subheadline)
-                                                    .fontWeight(.medium)
-                                            }
-                                            
-                                            Text("\(articlesWithAI.count) / \(response.count) articles ready")
-                                                .font(.caption)
-                                                .foregroundStyle(.secondary)
-                                        }
-                                        
-                                        Spacer()
-                                    }
-                                    .padding(.horizontal, 20)
-                                    .padding(.vertical, 12)
-                                    .background(
-                                        RoundedRectangle(cornerRadius: 12)
-                                            .fill(Color.purple.opacity(0.05))
-                                    )
-                                    .padding(.horizontal, 20)
+                            // Loading Indicator at bottom
+                            if isGeneratingSummaries {
+                                HStack(spacing: 12) {
+                                    ProgressView()
+                                        .tint(.purple)
+                                    Text("AI analyzing more articles...")
+                                        .font(.subheadline)
+                                        .foregroundStyle(.secondary)
                                 }
-                                .padding(.top, 8)
+                                .padding(.vertical, 20)
+                                .frame(maxWidth: .infinity)
+                                .background(.ultraThinMaterial)
+                                .clipShape(RoundedRectangle(cornerRadius: 20))
+                                .padding(.horizontal)
                             }
                         }
                         .padding(.bottom, 20)
                     }
+                    .refreshable {
+                        loadNews()
+                    }
                 } else {
+                    // Empty State / Initial State
                     VStack(spacing: 32) {
                         Spacer()
                         
-                        // Icon with gradient background
                         ZStack {
                             Circle()
                                 .fill(
                                     LinearGradient(
-                                        colors: [.blue.opacity(0.2), .purple.opacity(0.2)],
+                                        colors: [.blue.opacity(0.1), .purple.opacity(0.1)],
                                         startPoint: .topLeading,
                                         endPoint: .bottomTrailing
                                     )
                                 )
-                                .frame(width: 120, height: 120)
+                                .frame(width: 160, height: 160)
+                                .blur(radius: 20)
                             
-                            Image(systemName: "newspaper.fill")
-                                .font(.system(size: 50))
+                            Image(systemName: "newspaper")
+                                .font(.system(size: 60))
                                 .foregroundStyle(
                                     LinearGradient(
                                         colors: [.blue, .purple],
@@ -230,13 +140,15 @@ struct NewsView: View {
                                     )
                                 )
                         }
+                        .scaleEffect(isLoading ? 1.1 : 1.0)
+                        .animation(.easeInOut(duration: 1).repeatForever(autoreverses: true), value: isLoading)
                         
-                        VStack(spacing: 12) {
-                            Text("Stay Informed")
-                                .font(.title2)
+                        VStack(spacing: 16) {
+                            Text("Discover the World")
+                                .font(.title)
                                 .fontWeight(.bold)
                             
-                            Text("Get the latest news from top sources")
+                            Text("AI-curated news summaries tailored for you.\nSelect a category to get started.")
                                 .font(.body)
                                 .foregroundStyle(.secondary)
                                 .multilineTextAlignment(.center)
@@ -246,16 +158,24 @@ struct NewsView: View {
                         Button {
                             loadNews()
                         } label: {
-                            HStack(spacing: 8) {
-                                Image(systemName: "arrow.down.circle.fill")
-                                Text("Load News")
+                            HStack(spacing: 12) {
+                                Text("Start Reading")
                                     .fontWeight(.semibold)
+                                Image(systemName: "arrow.right")
                             }
                             .padding(.horizontal, 32)
                             .padding(.vertical, 16)
+                            .background(
+                                LinearGradient(
+                                    colors: [.blue, .purple],
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
+                            )
+                            .foregroundStyle(.white)
+                            .clipShape(Capsule())
+                            .shadow(color: .blue.opacity(0.3), radius: 10, x: 0, y: 5)
                         }
-                        .buttonStyle(.borderedProminent)
-                        .controlSize(.large)
                         
                         Spacer()
                     }
@@ -264,7 +184,6 @@ struct NewsView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .principal) {
-                    // 頂部類別選擇條（放在導航欄中央）
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 12) {
                             ForEach(categories, id: \.0) { category in
@@ -272,6 +191,7 @@ struct NewsView: View {
                                     title: category.1,
                                     icon: category.2,
                                     isSelected: selectedCategory == category.0,
+                                    namespace: animation,
                                     action: {
                                         withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
                                             selectedCategory = category.0
@@ -282,8 +202,8 @@ struct NewsView: View {
                             }
                         }
                         .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
                     }
-                    .frame(maxWidth: .infinity)
                 }
             }
             .fullScreenCover(item: $selectedArticle) { article in
@@ -431,17 +351,63 @@ struct NewsView: View {
     }
 }
 
-// Featured Article Card with Large Format
+// MARK: - Subviews
+
+struct LoadingView: View {
+    @State private var isAnimating = false
+    
+    var body: some View {
+        VStack(spacing: 24) {
+            ZStack {
+                ForEach(0..<3) { index in
+                    Circle()
+                        .stroke(
+                            LinearGradient(
+                                colors: [.blue, .purple],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 4
+                        )
+                        .frame(width: 60, height: 60)
+                        .scaleEffect(isAnimating ? 1.5 : 0.5)
+                        .opacity(isAnimating ? 0 : 1)
+                        .animation(
+                            .easeOut(duration: 2)
+                            .repeatForever(autoreverses: false)
+                            .delay(Double(index) * 0.4),
+                            value: isAnimating
+                        )
+                }
+                
+                Image(systemName: "globe")
+                    .font(.system(size: 30))
+                    .foregroundStyle(.blue)
+            }
+            .onAppear { isAnimating = true }
+            
+            VStack(spacing: 8) {
+                Text("Curating Your News")
+                    .font(.title3)
+                    .fontWeight(.bold)
+                
+                Text("AI is analyzing the latest stories...")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+}
+
 struct FeaturedNewsCard: View {
     let article: NewsArticle
     let onTap: () -> Void
     
     var body: some View {
-        Button {
-            onTap()
-        } label: {
+        Button(action: onTap) {
             VStack(alignment: .leading, spacing: 16) {
-                // Category Badge
+                // Badge & Date
                 HStack {
                     Text(article.category.uppercased())
                         .font(.caption2)
@@ -462,182 +428,128 @@ struct FeaturedNewsCard: View {
                     
                     Spacer()
                     
-                    Image(systemName: "star.fill")
-                        .foregroundStyle(.yellow)
+                    Text(article.formattedDate)
                         .font(.caption)
+                        .foregroundStyle(.secondary)
                 }
                 
                 // Title
                 Text(article.title)
-                    .font(.title3)
+                    .font(.title2)
                     .fontWeight(.bold)
                     .foregroundStyle(.primary)
-                    .multilineTextAlignment(.leading)
                     .lineLimit(3)
                 
-                // AI Summary (所有顯示的文章都應該有 AI 摘要)
+                // AI Summary
                 if let aiSummary = article.aiSummary {
-                    VStack(alignment: .leading, spacing: 8) {
-                        HStack(spacing: 4) {
-                            Image(systemName: "sparkles")
-                                .font(.caption2)
-                                .foregroundStyle(.purple)
-                            Text("AI Summary")
-                                .font(.caption2)
-                                .fontWeight(.semibold)
-                                .foregroundStyle(.purple)
+                    Text(aiSummary)
+                        .font(.body)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(3)
+                        .padding(.leading, 12)
+                        .overlay(alignment: .leading) {
+                            Rectangle()
+                                .fill(Color.purple.opacity(0.5))
+                                .frame(width: 3)
                         }
-                        
-                        Text(aiSummary)
-                            .font(.body)
-                            .foregroundStyle(.primary)
-                            .lineLimit(4)
-                            .multilineTextAlignment(.leading)
-                    }
                 }
                 
                 Divider()
                 
-                // Footer with more detail
-                HStack(spacing: 12) {
-                    // Source with icon
-                    HStack(spacing: 6) {
-                        Image(systemName: "building.2.fill")
-                            .font(.caption2)
-                            .foregroundStyle(.blue)
-                        Text(article.source)
-                            .font(.caption)
-                            .fontWeight(.medium)
-                            .foregroundStyle(.primary)
-                    }
-                    
-                    Spacer()
-                    
-                    // Date with icon
-                    HStack(spacing: 6) {
-                        Image(systemName: "clock.fill")
-                            .font(.caption2)
-                            .foregroundStyle(.orange)
-                        Text(article.formattedDate)
-                            .font(.caption)
-                            .fontWeight(.medium)
-                            .foregroundStyle(.primary)
-                    }
-                }
-                
-                // Read More Button
+                // Footer
                 HStack {
+                    Label(article.source, systemImage: "newspaper")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    
                     Spacer()
+                    
                     HStack(spacing: 4) {
-                        Text("Read Full Article")
+                        Text("Read Story")
                             .font(.caption)
                             .fontWeight(.semibold)
-                        Image(systemName: "arrow.right.circle.fill")
+                        Image(systemName: "arrow.right")
                             .font(.caption)
                     }
                     .foregroundStyle(.blue)
                 }
             }
             .padding(20)
-            .background(
-                RoundedRectangle(cornerRadius: 20)
-                    .fill(Color(.secondarySystemBackground))
-                    .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: 5)
-            )
-            .padding(.horizontal, 16)
+            .background(Color(.systemBackground))
+            .clipShape(RoundedRectangle(cornerRadius: 24))
+            .shadow(color: Color.black.opacity(0.08), radius: 15, x: 0, y: 5)
+            .padding(.horizontal, 20)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(NewsScaleButtonStyle())
     }
 }
 
-// Regular Article Card with Compact Format
 struct NewsArticleCard: View {
     let article: NewsArticle
+    let index: Int
     let onTap: () -> Void
+    @State private var isVisible = false
     
     var body: some View {
-        Button {
-            onTap()
-        } label: {
-            HStack(alignment: .top, spacing: 16) {
-                // Left color accent bar
+        Button(action: onTap) {
+            HStack(spacing: 16) {
+                // Left Accent
                 RoundedRectangle(cornerRadius: 2)
-                    .fill(
-                        LinearGradient(
-                            colors: [.blue, .purple],
-                            startPoint: .top,
-                            endPoint: .bottom
-                        )
-                    )
+                    .fill(Color.blue.opacity(0.5))
                     .frame(width: 4)
+                    .frame(height: 60)
                 
-                VStack(alignment: .leading, spacing: 10) {
-                    // Title
+                VStack(alignment: .leading, spacing: 8) {
                     Text(article.title)
                         .font(.headline)
                         .fontWeight(.semibold)
                         .foregroundStyle(.primary)
-                        .multilineTextAlignment(.leading)
                         .lineLimit(2)
                     
-                    // AI Summary (所有顯示的文章都應該有 AI 摘要)
                     if let aiSummary = article.aiSummary {
-                        HStack(spacing: 4) {
-                            Image(systemName: "sparkles")
-                                .font(.caption2)
-                                .foregroundStyle(.purple)
-                            Text(aiSummary)
-                                .font(.subheadline)
-                                .foregroundStyle(.primary)
-                                .lineLimit(2)
-                                .multilineTextAlignment(.leading)
-                        }
+                        Text(aiSummary)
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(2)
                     }
                     
-                    // Footer
-                    HStack(spacing: 8) {
-                        // Source
+                    HStack {
                         Text(article.source)
                             .font(.caption2)
                             .foregroundStyle(.tertiary)
-                            .lineLimit(1)
-                        
-                        Text("•")
-                            .foregroundStyle(.tertiary)
-                        
-                        // Date
+                        Spacer()
                         Text(article.formattedDate)
                             .font(.caption2)
                             .foregroundStyle(.tertiary)
-                        
-                        Spacer()
-                        
-                        // Arrow indicator
-                        Image(systemName: "chevron.right")
-                            .font(.caption2)
-                            .foregroundStyle(.blue)
                     }
                 }
+                
+                Image(systemName: "chevron.right")
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
             }
-            .padding(.vertical, 16)
-            .padding(.trailing, 16)
-            .background(Color(.tertiarySystemBackground))
+            .padding(16)
+            .background(Color(.systemBackground))
             .clipShape(RoundedRectangle(cornerRadius: 16))
-            .overlay(
-                RoundedRectangle(cornerRadius: 16)
-                    .stroke(Color(.separator).opacity(0.3), lineWidth: 1)
-            )
-            .padding(.horizontal, 16)
+            .shadow(color: Color.black.opacity(0.05), radius: 8, x: 0, y: 2)
+            .padding(.horizontal, 20)
+            .offset(y: isVisible ? 0 : 50)
+            .opacity(isVisible ? 1 : 0)
+            .onAppear {
+                withAnimation(.spring(response: 0.6, dampingFraction: 0.8).delay(Double(index % 10) * 0.1)) {
+                    isVisible = true
+                }
+            }
         }
-        .buttonStyle(.plain)
+        .buttonStyle(NewsScaleButtonStyle())
     }
 }
 
-// Category Chip Component
 struct CategoryChip: View {
     let title: String
     let icon: String
     let isSelected: Bool
+    var namespace: Namespace.ID
     let action: () -> Void
     
     var body: some View {
@@ -652,27 +564,35 @@ struct CategoryChip: View {
             .padding(.horizontal, 16)
             .padding(.vertical, 8)
             .background(
-                Group {
+                ZStack {
                     if isSelected {
-                        LinearGradient(
-                            colors: [.blue, .purple],
-                            startPoint: .leading,
-                            endPoint: .trailing
-                        )
+                        Capsule()
+                            .fill(
+                                LinearGradient(
+                                    colors: [.blue, .purple],
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
+                            )
+                            .matchedGeometryEffect(id: "bg", in: namespace)
                     } else {
-                        Color(.secondarySystemBackground)
+                        Capsule()
+                            .fill(Color(.secondarySystemBackground))
                     }
                 }
             )
             .foregroundStyle(isSelected ? .white : .primary)
-            .clipShape(Capsule())
-            .overlay(
-                Capsule()
-                    .stroke(isSelected ? Color.clear : Color(.separator), lineWidth: 1)
-            )
-            .shadow(color: isSelected ? .blue.opacity(0.3) : .clear, radius: 8, x: 0, y: 4)
+            .animation(.spring(), value: isSelected)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(NewsScaleButtonStyle())
+    }
+}
+
+struct NewsScaleButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.97 : 1)
+            .animation(.spring(response: 0.3, dampingFraction: 0.6), value: configuration.isPressed)
     }
 }
 

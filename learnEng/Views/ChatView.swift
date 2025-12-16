@@ -19,144 +19,91 @@ struct ChatView: View {
     let onSendMessage: () -> Void
     
     var body: some View {
-        VStack(spacing: 0) {
+        ZStack(alignment: .bottom) {
+            Color(.systemGroupedBackground)
+                .ignoresSafeArea()
+            
             if model.availability == .available {
-                // Chat messages
-                ScrollView {
-                    LazyVStack(spacing: 16) {
-                        ForEach(chattingSession) { message in
-                            VStack(alignment: .leading, spacing: 12) {
-                                // User message bubble
-                                VStack(alignment: .trailing, spacing: 6) {
-                                    HStack {
-                                        Spacer()
-                                        Text(message.query)
-                                            .font(.body)
-                                            .padding(.horizontal, 16)
-                                            .padding(.vertical, 12)
-                                            .background(Color.accentColor)
-                                            .foregroundColor(.white)
-                                            .clipShape(RoundedRectangle(cornerRadius: 18))
-                                    }
-                                    
-                                    // Action buttons
-                                    HStack(spacing: 12) {
-                                        Button {
-                                            resendMessage(message.query)
-                                        } label: {
-                                            HStack(spacing: 4) {
-                                                Image(systemName: "arrow.clockwise")
-                                                    .font(.caption)
-                                                Text("Resend")
-                                                    .font(.caption)
-                                            }
-                                            .foregroundColor(.secondary)
-                                        }
-                                        .disabled(waitingModelReply)
-                                        
-                                        Button {
-                                            editMessage(message.query)
-                                        } label: {
-                                            HStack(spacing: 4) {
-                                                Image(systemName: "pencil")
-                                                    .font(.caption)
-                                                Text("Edit")
-                                                    .font(.caption)
-                                            }
-                                            .foregroundColor(.secondary)
-                                        }
-                                        .disabled(waitingModelReply)
-                                    }
-                                    .padding(.trailing, 4)
-                                }
-                                
-                                // AI message bubble
-                                HStack(alignment: .top, spacing: 10) {
-                                    // AI avatar
-                                    Circle()
-                                        .fill(Color.accentColor.opacity(0.2))
-                                        .frame(width: 36, height: 36)
-                                        .overlay(
-                                            Image(systemName: "brain.head.profile")
-                                                .font(.system(size: 18))
-                                                .foregroundColor(.accentColor)
-                                        )
-                                    
-                                    if let card = message.card {
-                                        WordCardView(card: card, query: message.query)
-                                    } else if message.reply.isEmpty {
-                                        HStack(spacing: 8) {
-                                            ProgressView()
-                                            Text("Thinking...")
-                                                .font(.subheadline)
-                                                .foregroundColor(.secondary)
-                                        }
-                                        .padding(.horizontal, 16)
-                                        .padding(.vertical, 12)
-                                        .background(Color(.secondarySystemBackground))
-                                        .clipShape(RoundedRectangle(cornerRadius: 18))
-                                    } else {
-                                        Text(message.formattedReply)
-                                            .font(.body)
-                                            .padding(.horizontal, 16)
-                                            .padding(.vertical, 12)
-                                            .background(Color(.secondarySystemBackground))
-                                            .foregroundColor(.accentColor)
-                                            .clipShape(RoundedRectangle(cornerRadius: 18))
-                                    }
-                                    
-                                    Spacer()
-                                }
+                ScrollViewReader { proxy in
+                    ScrollView {
+                        LazyVStack(spacing: 24) {
+                            ForEach(chattingSession) { message in
+                                MessageView(
+                                    message: message,
+                                    waitingModelReply: waitingModelReply,
+                                    onResend: { resendMessage($0) },
+                                    onEdit: { editMessage($0) }
+                                )
+                                .id(message.id)
+                                .transition(.asymmetric(
+                                    insertion: .scale(scale: 0.9).combined(with: .opacity).combined(with: .move(edge: .bottom)),
+                                    removal: .opacity
+                                ))
                             }
+                            
+                            // Invisible spacer for scrolling to bottom
+                            Color.clear
+                                .frame(height: 1)
+                                .id("bottom")
                         }
+                        .padding(.horizontal, 20)
+                        .padding(.top, 20)
+                        .padding(.bottom, 100) // Space for input bar
+                    }
+                    .onChange(of: chattingSession.count) { _ in
+                        withAnimation(.spring(response: 0.5, dampingFraction: 0.7)) {
+                            proxy.scrollTo("bottom", anchor: .bottom)
+                        }
+                    }
+                }
+                
+                // Input Area
+                VStack(spacing: 0) {
+                    Divider()
+                        .opacity(0)
+                    
+                    HStack(spacing: 12) {
+                        TextField("Type a word to look up...", text: $userInput, axis: .vertical)
+                            .lineLimit(1...4)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 12)
+                            .background(Color(.systemBackground))
+                            .clipShape(RoundedRectangle(cornerRadius: 24))
+                            .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
+                            .onSubmit {
+                                onSendMessage()
+                            }
+                        
+                        Button {
+                            withAnimation(.spring(response: 0.4, dampingFraction: 0.6)) {
+                                onSendMessage()
+                            }
+                        } label: {
+                            stateImg
+                                .font(.system(size: 20, weight: .semibold))
+                                .foregroundColor(.white)
+                                .frame(width: 48, height: 48)
+                                .background(
+                                    Circle()
+                                        .fill(
+                                            LinearGradient(
+                                                colors: [.accentColor, .purple],
+                                                startPoint: .topLeading,
+                                                endPoint: .bottomTrailing
+                                            )
+                                        )
+                                )
+                                .shadow(color: .accentColor.opacity(0.4), radius: 8, x: 0, y: 4)
+                        }
+                        .disabled(userInput.isEmpty && !waitingModelReply)
+                        .opacity(userInput.isEmpty && !waitingModelReply ? 0.6 : 1)
                     }
                     .padding(.horizontal, 16)
                     .padding(.vertical, 12)
+                    .background(.ultraThinMaterial)
                 }
-                
-                Divider()
-                
-                // Input area
-                HStack(spacing: 12) {
-                    TextField("Type a word to look up...", text: $userInput, axis: .vertical)
-                        .lineLimit(1...4)
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 12)
-                        .background(Color(.tertiarySystemBackground))
-                        .foregroundStyle(Color(.label))
-                        .clipShape(RoundedRectangle(cornerRadius: 20))
-                        .onSubmit {
-                            onSendMessage()
-                        }
-                    
-                    Button {
-                        onSendMessage()
-                    } label: {
-                        stateImg
-                            .font(.system(size: 20))
-                            .frame(width: 44, height: 44)
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .clipShape(Circle())
-                }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 12)
-                .background(Color(.systemBackground))
             } else {
-                // Model unavailable message
-                VStack(spacing: 16) {
-                    Image(systemName: "exclamationmark.triangle")
-                        .font(.system(size: 48))
-                        .foregroundColor(.orange)
-                    Text("Language Model Unavailable")
-                        .font(.headline)
-                    Text("Please enable Language model in settings")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                        .multilineTextAlignment(.center)
-                }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .padding()
+                UnavailableView()
             }
         }
     }
@@ -169,5 +116,159 @@ struct ChatView: View {
     
     private func editMessage(_ query: String) {
         userInput = query
+    }
+}
+
+struct MessageView: View {
+    let message: ChatMessage
+    let waitingModelReply: Bool
+    let onResend: (String) -> Void
+    let onEdit: (String) -> Void
+    
+    @State private var showActions = false
+    
+    var body: some View {
+        VStack(spacing: 8) {
+            // User Message
+            HStack {
+                Spacer()
+                VStack(alignment: .trailing, spacing: 4) {
+                    Text(message.query)
+                        .font(.body)
+                        .padding(.horizontal, 18)
+                        .padding(.vertical, 12)
+                        .background(
+                            LinearGradient(
+                                colors: [Color.accentColor, Color.blue.opacity(0.8)],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                        .foregroundColor(.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+                        .shadow(color: Color.accentColor.opacity(0.2), radius: 5, x: 0, y: 3)
+                        .onTapGesture {
+                            withAnimation(.spring()) { showActions.toggle() }
+                        }
+                    
+                    if showActions {
+                        HStack(spacing: 16) {
+                            Button { onResend(message.query) } label: {
+                                Label("Resend", systemImage: "arrow.clockwise")
+                                    .font(.caption)
+                                    .fontWeight(.medium)
+                            }
+                            .disabled(waitingModelReply)
+                            
+                            Button { onEdit(message.query) } label: {
+                                Label("Edit", systemImage: "pencil")
+                                    .font(.caption)
+                                    .fontWeight(.medium)
+                            }
+                            .disabled(waitingModelReply)
+                        }
+                        .foregroundColor(.secondary)
+                        .padding(.trailing, 8)
+                        .transition(.move(edge: .top).combined(with: .opacity))
+                    }
+                }
+            }
+            
+            // AI Message
+            HStack(alignment: .top, spacing: 12) {
+                ZStack {
+                    Circle()
+                        .fill(Color.white)
+                        .frame(width: 36, height: 36)
+                        .shadow(color: Color.black.opacity(0.1), radius: 3, x: 0, y: 1)
+                    
+                    Image(systemName: "brain.head.profile")
+                        .font(.system(size: 18))
+                        .foregroundColor(.accentColor)
+                }
+                
+                VStack(alignment: .leading) {
+                    if let card = message.card {
+                        WordCardView(card: card, query: message.query)
+                            .shadow(color: Color.black.opacity(0.05), radius: 8, x: 0, y: 4)
+                    } else if message.reply.isEmpty {
+                        TypingIndicator()
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 12)
+                            .background(Color(.secondarySystemBackground))
+                            .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+                    } else {
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text(message.formattedReply)
+                                .font(.body)
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 12)
+                                .background(Color(.secondarySystemBackground))
+                                .foregroundColor(.primary)
+                                .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+                            
+                            Button {
+                                SpeechSynthesizer.shared.speak(String(message.formattedReply.characters))
+                            } label: {
+                                Image(systemName: "speaker.wave.2.circle.fill")
+                                    .font(.title3)
+                                    .foregroundColor(.blue.opacity(0.8))
+                            }
+                            .padding(.leading, 4)
+                        }
+                    }
+                }
+                Spacer()
+            }
+        }
+    }
+}
+
+struct TypingIndicator: View {
+    @State private var isAnimating = false
+    
+    var body: some View {
+        HStack(spacing: 4) {
+            ForEach(0..<3) { index in
+                Circle()
+                    .fill(Color.secondary.opacity(0.6))
+                    .frame(width: 6, height: 6)
+                    .scaleEffect(isAnimating ? 1.0 : 0.5)
+                    .animation(
+                        Animation.easeInOut(duration: 0.6)
+                            .repeatForever()
+                            .delay(Double(index) * 0.2),
+                        value: isAnimating
+                    )
+            }
+        }
+        .onAppear {
+            isAnimating = true
+        }
+    }
+}
+
+struct UnavailableView: View {
+    var body: some View {
+        VStack(spacing: 20) {
+            Image(systemName: "exclamationmark.triangle.fill")
+                .font(.system(size: 60))
+                .foregroundColor(.orange)
+                .shadow(color: .orange.opacity(0.3), radius: 10)
+            
+            VStack(spacing: 8) {
+                Text("Language Model Unavailable")
+                    .font(.title3)
+                    .fontWeight(.bold)
+                
+                Text("Please enable the Language model in settings to start chatting.")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal)
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color(.systemGroupedBackground))
     }
 }

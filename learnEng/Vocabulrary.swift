@@ -5,32 +5,62 @@ struct VocabulraryView: View {
     @Query(sort: \Item.timestamp, order: .reverse) private var items: [Item]
     @Environment(\.modelContext) private var modelContext
     @State private var selectedItem: Item?
+    @State private var searchText = ""
+    
+    var filteredItems: [Item] {
+        if searchText.isEmpty {
+            return items
+        } else {
+            return items.filter { item in
+                (item.word ?? item.query).localizedCaseInsensitiveContains(searchText) ||
+                (item.translation ?? "").localizedCaseInsensitiveContains(searchText)
+            }
+        }
+    }
 
     var body: some View {
         NavigationStack {
-            List {
-                ForEach(items) { item in
-                    Button {
-                        selectedItem = item
-                    } label: {
-                        VocabularyCard(item: item)
-                    }
-                    .buttonStyle(.plain)
-                    .listRowSeparator(.hidden)
-                    .listRowBackground(Color.clear)
-                    .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
-                    .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                        Button(role: .destructive) {
-                            deleteItem(item)
-                        } label: {
-                            Label("Delete", systemImage: "trash")
+            ZStack {
+                // Background
+                Color(.systemGroupedBackground)
+                    .ignoresSafeArea()
+                
+                if items.isEmpty {
+                    ContentUnavailableView(
+                        "No Vocabulary Yet",
+                        systemImage: "book.closed",
+                        description: Text("Words you save from chat will appear here.")
+                    )
+                } else {
+                    ScrollView {
+                        LazyVStack(spacing: 16) {
+                            // Search Bar
+                            HStack {
+                                Image(systemName: "magnifyingglass")
+                                    .foregroundColor(.secondary)
+                                TextField("Search words...", text: $searchText)
+                            }
+                            .padding()
+                            .background(Color(.systemBackground))
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                            .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
+                            .padding(.horizontal)
+                            .padding(.top)
+                            
+                            ForEach(Array(filteredItems.enumerated()), id: \.element.id) { index, item in
+                                Button {
+                                    selectedItem = item
+                                } label: {
+                                    VocabularyCard(item: item, index: index)
+                                }
+                                .buttonStyle(ScaleButtonStyle())
+                            }
                         }
+                        .padding(.bottom, 100)
                     }
                 }
             }
-            .listStyle(.plain)
             .navigationTitle("Vocabulary")
-            .background(Color(.systemGroupedBackground))
             .fullScreenCover(item: $selectedItem) { item in
                 VocabularyDetailView(item: item)
             }
@@ -44,8 +74,18 @@ struct VocabulraryView: View {
     }
 }
 
+struct ScaleButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.98 : 1)
+            .animation(.spring(response: 0.3, dampingFraction: 0.6), value: configuration.isPressed)
+    }
+}
+
 struct VocabularyCard: View {
     let item: Item
+    let index: Int
+    @State private var isVisible = false
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -135,9 +175,19 @@ struct VocabularyCard: View {
             .padding(.top, 4)
         }
         .padding()
-        .background(Color(.secondarySystemBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 16))
-        .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
+        .background(
+            RoundedRectangle(cornerRadius: 20)
+                .fill(Color(.systemBackground))
+                .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 5)
+        )
+        .padding(.horizontal)
+        .offset(y: isVisible ? 0 : 50)
+        .opacity(isVisible ? 1 : 0)
+        .onAppear {
+            withAnimation(.spring(response: 0.6, dampingFraction: 0.8).delay(Double(index % 10) * 0.05)) {
+                isVisible = true
+            }
+        }
     }
 }
 

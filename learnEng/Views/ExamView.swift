@@ -22,10 +22,14 @@ struct ExamView: View {
     
     var body: some View {
         NavigationStack {
-            VStack {
+            ZStack {
+                Color(uiColor: .systemGroupedBackground)
+                    .ignoresSafeArea()
+                
                 contentView
             }
             .navigationTitle("Exam")
+            .navigationBarTitleDisplayMode(.inline)
             .fullScreenCover(isPresented: $showFlashCards) {
                 FlashCardView()
             }
@@ -46,11 +50,10 @@ struct ExamView: View {
             }
         }
     }
-    
     @ViewBuilder
     private var contentView: some View {
         if isGenerating {
-            ProgressView("Generating Exam...")
+            loadingView
         } else if questions.isEmpty {
             emptyStateView
         } else {
@@ -58,377 +61,251 @@ struct ExamView: View {
         }
     }
     
+    private var loadingView: some View {
+        VStack(spacing: 20) {
+            ProgressView()
+                .scaleEffect(1.5)
+                .tint(.blue)
+            Text("Generating Exam...")
+                .font(.headline)
+                .foregroundStyle(.secondary)
+            Text("Crafting questions from your vocabulary...")
+                .font(.caption)
+                .foregroundStyle(.tertiary)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(.ultraThinMaterial)
+    }
+    
     @ViewBuilder
     private var emptyStateView: some View {
         if items.isEmpty {
             ContentUnavailableView("No Vocabulary", systemImage: "book.closed", description: Text("Add some words to your vocabulary first."))
         } else {
-            VStack(spacing: 24) {
-                Image(systemName: "studentdesk")
-                    .font(.system(size: 60))
-                    .foregroundStyle(.blue)
+            VStack(spacing: 30) {
+                Spacer()
                 
-                Text("Ready to test your knowledge?")
-                    .font(.title2)
-                    .bold()
-                
-                Text("We will generate questions based on your vocabulary list.")
-                    .multilineTextAlignment(.center)
-                    .foregroundStyle(.secondary)
-                    .padding(.horizontal)
+                Image(systemName: "graduationcap.fill")
+                    .font(.system(size: 80))
+                    .foregroundStyle(
+                        LinearGradient(colors: [.blue, .purple], startPoint: .topLeading, endPoint: .bottomTrailing)
+                    )
+                    .shadow(color: .blue.opacity(0.3), radius: 10, x: 0, y: 10)
                 
                 VStack(spacing: 12) {
-                    Button("Start Exam") {
-                        generateQuestions()
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .controlSize(.large)
+                    Text("Ready to Test?")
+                        .font(.title)
+                        .fontWeight(.bold)
                     
-                    // 閃卡按鈕 - 更明顯的設計
+                    Text("We'll generate a personalized exam based on your vocabulary list.")
+                        .multilineTextAlignment(.center)
+                        .foregroundStyle(.secondary)
+                        .padding(.horizontal, 40)
+                }
+                
+                VStack(spacing: 16) {
+                    Button {
+                        generateQuestions()
+                    } label: {
+                        HStack {
+                            Image(systemName: "play.fill")
+                            Text("Start Exam")
+                        }
+                        .font(.headline)
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(
+                            LinearGradient(colors: [.blue, .blue.opacity(0.8)], startPoint: .top, endPoint: .bottom)
+                        )
+                        .clipShape(RoundedRectangle(cornerRadius: 16))
+                        .shadow(color: .blue.opacity(0.3), radius: 8, x: 0, y: 4)
+                    }
+                    .buttonStyle(ScaleButtonStyle())
+                    
                     Button {
                         showFlashCards = true
                     } label: {
-                        HStack(spacing: 12) {
+                        HStack {
                             Image(systemName: "rectangle.stack.fill")
-                                .font(.title3)
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text("Review with Flash Cards")
-                                    .font(.headline)
-                                Text("Quick memory practice")
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                            }
-                            Spacer()
-                            Image(systemName: "chevron.right")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
+                            Text("Review Flash Cards")
                         }
-                        .padding()
+                        .font(.headline)
+                        .foregroundColor(.primary)
                         .frame(maxWidth: .infinity)
-                        .background(
-                            RoundedRectangle(cornerRadius: 12)
-                                .fill(Color(.secondarySystemBackground))
-                        )
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 12)
-                                .stroke(Color.blue.opacity(0.3), lineWidth: 2)
-                        )
+                        .padding()
+                        .background(Color(uiColor: .secondarySystemGroupedBackground))
+                        .clipShape(RoundedRectangle(cornerRadius: 16))
+                        .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
                     }
-                    .buttonStyle(.plain)
-                    .padding(.horizontal)
+                    .buttonStyle(ScaleButtonStyle())
                 }
+                .padding(.horizontal, 30)
+                
+                Spacer()
             }
         }
     }
     
     private var examListView: some View {
-        List {
-            ForEach(questions) { question in
-                questionView(for: question)
-            }
-            
-            if showResults {
-                scoreSection
-            }
-            
-            actionButtonSection
-        }
-        .listStyle(.plain)
-    }
-    
-    @ViewBuilder
-    private func questionView(for question: ExamQuestion) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Text(question.type.replacingOccurrences(of: "_", with: " ").capitalized)
-                    .font(.caption)
-                    .fontWeight(.bold)
-                    .padding(6)
-                    .background(Color.blue.opacity(0.1))
-                    .foregroundStyle(.blue)
-                    .clipShape(Capsule())
-                
-                Spacer()
-            }
-            
-            if let passage = question.passage {
-                Text(passage)
-                    .font(.body)
-                    .lineSpacing(4)
-                    .padding()
-                    .background(Color(.secondarySystemBackground))
-                    .cornerRadius(8)
-            }
-            
-            Text(question.question)
-                .font(.title3)
-                .fontWeight(.semibold)
-            
-            if question.questionType == .multipleChoice || question.questionType == .reading {
-                multipleChoiceOptions(for: question)
-            } else if question.questionType == .fillInBlank {
-                fillInBlankField(for: question)
-            }
-            
-            if showResults {
-                resultFeedback(for: question)
-            }
-        }
-        .padding(.vertical)
-    }
-    
-    @ViewBuilder
-    private func multipleChoiceOptions(for question: ExamQuestion) -> some View {
-        if let options = question.options {
-            VStack(alignment: .leading, spacing: 8) {
-                ForEach(options, id: \.self) { option in
-                    optionButton(option: option, question: question)
-                }
-            }
-        }
-    }
-    
-    private func optionButton(option: String, question: ExamQuestion) -> some View {
-        Button {
-            if !showResults {
-                userAnswers[question.id] = option
-            }
-        } label: {
-            HStack {
-                Image(systemName: userAnswers[question.id] == option ? "circle.inset.filled" : "circle")
-                    .foregroundStyle(userAnswers[question.id] == option ? .blue : .secondary)
-                Text(option)
-                    .font(.body)
-                    .foregroundStyle(.primary)
-                Spacer()
-                
-                if showResults {
-                    if option == question.correctAnswerText {
-                        Image(systemName: "checkmark.circle.fill")
+        ScrollView {
+            LazyVStack(spacing: 24) {
+                // Header
+                HStack {
+                    VStack(alignment: .leading) {
+                        Text("English Exam")
+                            .font(.largeTitle)
+                            .fontWeight(.bold)
+                        Text("\(questions.count) Questions")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                    }
+                    Spacer()
+                    
+                    if showResults {
+                        Text("Finished")
+                            .font(.caption)
+                            .fontWeight(.bold)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 6)
+                            .background(Color.green.opacity(0.1))
                             .foregroundStyle(.green)
-                    } else if userAnswers[question.id] == option && option != question.correctAnswerText {
-                        Image(systemName: "xmark.circle.fill")
-                            .foregroundStyle(.red)
+                            .clipShape(Capsule())
                     }
                 }
+                .padding(.horizontal)
+                .padding(.top, 20)
+                
+                // Questions
+                ForEach(Array(questions.enumerated()), id: \.element.id) { index, question in
+                    QuestionCard(
+                        index: index,
+                        question: question,
+                        userAnswer: Binding(
+                            get: { userAnswers[question.id] },
+                            set: { userAnswers[question.id] = $0 }
+                        ),
+                        showResults: showResults,
+                        evaluation: evaluations[question.id]
+                    )
+                    .transition(.scale.combined(with: .opacity))
+                }
+                
+                if showResults {
+                    scoreSection
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                }
+                
+                actionButtonSection
+                    .padding(.bottom, 40)
             }
             .padding()
-            .background(
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(showResults && option == question.correctAnswerText ? Color.green.opacity(0.1) : Color.clear)
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 8)
-                    .stroke(
-                        showResults && option == question.correctAnswerText ? Color.green :
-                        userAnswers[question.id] == option ? Color.blue :
-                        Color.gray.opacity(0.3),
-                        lineWidth: showResults && option == question.correctAnswerText ? 2 : 1
-                    )
-            )
         }
-        .buttonStyle(.plain)
-    }
-    
-    private func fillInBlankField(for question: ExamQuestion) -> some View {
-        TextField("Your answer", text: Binding(
-            get: { userAnswers[question.id] ?? "" },
-            set: { userAnswers[question.id] = $0 }
-        ))
-        .font(.body)
-        .textFieldStyle(.roundedBorder)
-        .disabled(showResults)
-    }
-    
-    @ViewBuilder
-    private func resultFeedback(for question: ExamQuestion) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            if question.questionType == .multipleChoice || question.questionType == .reading {
-                multipleChoiceResult(for: question)
-            } else if question.questionType == .fillInBlank {
-                fillInBlankResult(for: question)
-            }
-        }
-        .padding(.top, 8)
-        .padding(.horizontal, 12)
-        .padding(.vertical, 8)
-        .background(Color(.tertiarySystemBackground))
-        .cornerRadius(8)
-    }
-    
-    @ViewBuilder
-    private func multipleChoiceResult(for question: ExamQuestion) -> some View {
-        let isCorrect = userAnswers[question.id] == question.correctAnswerText
-        
-        HStack(spacing: 8) {
-            Image(systemName: isCorrect ? "checkmark.circle.fill" : "xmark.circle.fill")
-                .foregroundStyle(isCorrect ? .green : .red)
-            Text(isCorrect ? "Correct!" : "Incorrect")
-                .fontWeight(.bold)
-                .foregroundStyle(isCorrect ? .green : .red)
-        }
-        
-        if !isCorrect {
-            if let userAnswer = userAnswers[question.id] {
-                Text("Your answer: \(userAnswer)")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            } else {
-                Text("You didn't answer this question")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-            
-            Text("Correct answer: \(question.correctAnswerText)")
-                .font(.caption)
-                .fontWeight(.semibold)
-                .foregroundStyle(.green)
-        }
-    }
-    
-    @ViewBuilder
-    private func fillInBlankResult(for question: ExamQuestion) -> some View {
-        if let evaluation = evaluations[question.id] {
-            Text(evaluation.isCorrect ? "Correct!" : "Incorrect")
-                .foregroundStyle(evaluation.isCorrect ? .green : .red)
-                .fontWeight(.bold)
-            
-            Text(evaluation.feedback)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-            
-            if !evaluation.isCorrect {
-                if let corrected = evaluation.corrected_answer {
-                    Text("Correct Answer: \(corrected)")
-                        .font(.caption)
-                        .fontWeight(.semibold)
-                        .foregroundStyle(.blue)
-                } else {
-                    Text("Correct Answer: \(question.correctAnswerText)")
-                        .font(.caption)
-                        .fontWeight(.semibold)
-                        .foregroundStyle(.blue)
-                }
-            }
-        } else if isEvaluating {
-            ProgressView()
-                .padding(.top, 4)
-        }
+        .scrollIndicators(.hidden)
     }
     
     @ViewBuilder
     private var scoreSection: some View {
-        Section {
+        VStack(spacing: 20) {
             if isEvaluating {
-                evaluatingView
+                VStack(spacing: 16) {
+                    ProgressView()
+                        .scaleEffect(1.5)
+                    Text("Grading your exam...")
+                        .font(.headline)
+                        .foregroundStyle(.secondary)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(40)
+                .background(Color(uiColor: .secondarySystemGroupedBackground))
+                .cornerRadius(20)
             } else {
-                finalScoreView
-            }
-        }
-        .listRowBackground(Color.clear)
-    }
-    
-    private var evaluatingView: some View {
-        VStack(spacing: 16) {
-            ProgressView()
-                .scaleEffect(1.5)
-            
-            Text("Evaluating your answers...")
-                .font(.title3)
-                .fontWeight(.semibold)
-                .foregroundStyle(.secondary)
-            
-            Text("Please wait while AI grades your fill-in-blank answers")
-                .font(.caption)
-                .foregroundStyle(.tertiary)
-                .multilineTextAlignment(.center)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 40)
-    }
-    
-    private var finalScoreView: some View {
-        VStack(spacing: 16) {
-            HStack {
-                Image(systemName: "chart.bar.fill")
-                    .font(.title2)
-                    .foregroundStyle(.blue)
-                
-                Text("Your Score")
-                    .font(.title2)
-                    .fontWeight(.bold)
-            }
-            
-            let score = calculateScore()
-            let percentage = Int((Double(score) / Double(questions.count)) * 100)
-            
-            HStack(alignment: .lastTextBaseline, spacing: 8) {
-                Text("\(score)")
-                    .font(.system(size: 60, weight: .bold))
-                    .foregroundStyle(
-                        percentage >= 80 ? .green :
-                        percentage >= 60 ? .orange : .red
-                    )
-                
-                Text("/ \(questions.count)")
-                    .font(.title)
-                    .foregroundStyle(.secondary)
-            }
-            
-            Text("\(percentage)%")
-                .font(.title3)
-                .fontWeight(.semibold)
-                .foregroundStyle(.secondary)
-            
-            Text(getGrade(percentage: percentage))
-                .font(.title2)
-                .fontWeight(.bold)
-                .padding(.horizontal, 20)
-                .padding(.vertical, 8)
-                .background(
-                    Capsule()
-                        .fill(
-                            percentage >= 80 ? Color.green.opacity(0.2) :
-                            percentage >= 60 ? Color.orange.opacity(0.2) : Color.red.opacity(0.2)
+                VStack(spacing: 20) {
+                    Text("Exam Results")
+                        .font(.title2)
+                        .fontWeight(.bold)
+                    
+                    let score = calculateScore()
+                    let percentage = questions.isEmpty ? 0 : Int((Double(score) / Double(questions.count)) * 100)
+                    
+                    ZStack {
+                        Circle()
+                            .stroke(Color.gray.opacity(0.2), lineWidth: 15)
+                            .frame(width: 150, height: 150)
+                        
+                        Circle()
+                            .trim(from: 0, to: CGFloat(percentage) / 100)
+                            .stroke(
+                                percentage >= 80 ? Color.green :
+                                percentage >= 60 ? Color.orange : Color.red,
+                                style: StrokeStyle(lineWidth: 15, lineCap: .round)
+                            )
+                            .rotationEffect(.degrees(-90))
+                            .frame(width: 150, height: 150)
+                        
+                        VStack {
+                            Text("\(score)/\(questions.count)")
+                                .font(.title)
+                                .fontWeight(.bold)
+                            Text("Score")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    
+                    Text(getGrade(percentage: percentage))
+                        .font(.title3)
+                        .fontWeight(.semibold)
+                        .foregroundStyle(
+                            percentage >= 80 ? .green :
+                            percentage >= 60 ? .orange : .red
                         )
-                )
-                .foregroundStyle(
-                    percentage >= 80 ? .green :
-                    percentage >= 60 ? .orange : .red
-                )
+                }
+                .frame(maxWidth: .infinity)
+                .padding(30)
+                .background(Color(uiColor: .secondarySystemGroupedBackground))
+                .cornerRadius(20)
+                .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 5)
+            }
         }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 20)
     }
     
     @ViewBuilder
     private var actionButtonSection: some View {
-        Section {
-            if !showResults {
-                Button("Submit") {
-                    submitExam()
-                }
-                .frame(maxWidth: .infinity)
-                .buttonStyle(.borderedProminent)
-                .listRowInsets(EdgeInsets())
-                .padding()
-                .disabled(isEvaluating)
-            } else {
-                Button("New Exam") {
-                    withAnimation {
-                        questions = []
-                        showResults = false
-                        userAnswers = [:]
-                        evaluations = [:]
-                    }
-                }
-                .frame(maxWidth: .infinity)
-                .buttonStyle(.bordered)
-                .listRowInsets(EdgeInsets())
-                .padding()
+        if !showResults {
+            Button {
+                submitExam()
+            } label: {
+                Text("Submit Exam")
+                    .font(.headline)
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.blue)
+                    .clipShape(RoundedRectangle(cornerRadius: 16))
+                    .shadow(color: .blue.opacity(0.3), radius: 8, x: 0, y: 4)
             }
+            .buttonStyle(ScaleButtonStyle())
+            .disabled(isEvaluating)
+        } else {
+            Button {
+                withAnimation {
+                    questions = []
+                    showResults = false
+                    userAnswers = [:]
+                    evaluations = [:]
+                }
+            } label: {
+                Text("Start New Exam")
+                    .font(.headline)
+                    .foregroundColor(.blue)
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.blue.opacity(0.1))
+                    .clipShape(RoundedRectangle(cornerRadius: 16))
+            }
+            .buttonStyle(ScaleButtonStyle())
         }
-        .listRowBackground(Color.clear)
     }
     
     @ViewBuilder
@@ -613,5 +490,207 @@ struct ExamView: View {
         default:
             return "Keep Trying 💪"
         }
+    }
+}
+
+struct QuestionCard: View {
+    let index: Int
+    let question: ExamQuestion
+    @Binding var userAnswer: String?
+    let showResults: Bool
+    let evaluation: AnswerEvaluation?
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            // Header
+            HStack {
+                Text("Q\(index + 1)")
+                    .font(.headline)
+                    .foregroundStyle(.secondary)
+                    .frame(width: 36, height: 36)
+                    .background(Color(.systemGray6))
+                    .clipShape(Circle())
+                
+                Text(question.type.replacingOccurrences(of: "_", with: " ").capitalized)
+                    .font(.caption)
+                    .fontWeight(.bold)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 5)
+                    .background(Color.blue.opacity(0.1))
+                    .foregroundStyle(.blue)
+                    .clipShape(Capsule())
+                
+                Spacer()
+                
+                if showResults {
+                    resultIcon
+                }
+            }
+            
+            // Passage
+            if let passage = question.passage {
+                Text(passage)
+                    .font(.system(.body, design: .serif))
+                    .lineSpacing(6)
+                    .padding()
+                    .background(Color(.secondarySystemBackground))
+                    .cornerRadius(12)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(Color.gray.opacity(0.2), lineWidth: 1)
+                    )
+            }
+            
+            // Question
+            Text(question.question)
+                .font(.title3)
+                .fontWeight(.semibold)
+                .foregroundStyle(.primary)
+            
+            Divider()
+            
+            // Options or Input
+            if question.questionType == .multipleChoice || question.questionType == .reading {
+                optionsView
+            } else {
+                inputView
+            }
+            
+            // Feedback
+            if showResults {
+                feedbackView
+            }
+        }
+        .padding(20)
+        .background(Color(uiColor: .secondarySystemGroupedBackground))
+        .cornerRadius(20)
+        .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 5)
+    }
+    
+    private var optionsView: some View {
+        VStack(spacing: 12) {
+            if let options = question.options {
+                ForEach(options, id: \.self) { option in
+                    Button {
+                        if !showResults {
+                            userAnswer = option
+                        }
+                    } label: {
+                        HStack {
+                            Image(systemName: userAnswer == option ? "circle.inset.filled" : "circle")
+                                .foregroundStyle(userAnswer == option ? .blue : .secondary)
+                            
+                            Text(option)
+                                .font(.body)
+                                .foregroundStyle(.primary)
+                            
+                            Spacer()
+                            
+                            if showResults {
+                                if option == question.correctAnswerText {
+                                    Image(systemName: "checkmark.circle.fill")
+                                        .foregroundStyle(.green)
+                                } else if userAnswer == option && option != question.correctAnswerText {
+                                    Image(systemName: "xmark.circle.fill")
+                                        .foregroundStyle(.red)
+                                }
+                            }
+                        }
+                        .padding()
+                        .background(
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(
+                                    showResults && option == question.correctAnswerText ? Color.green.opacity(0.1) :
+                                    userAnswer == option ? Color.blue.opacity(0.05) : Color(.systemGray6)
+                                )
+                        )
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(
+                                    showResults && option == question.correctAnswerText ? Color.green :
+                                    userAnswer == option ? Color.blue : Color.clear,
+                                    lineWidth: 2
+                                )
+                        )
+                    }
+                    .buttonStyle(ScaleButtonStyle())
+                    .disabled(showResults)
+                }
+            }
+        }
+    }
+    
+    private var inputView: some View {
+        VStack(alignment: .leading) {
+            Text("Your Answer:")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            
+            TextField("Type here...", text: Binding(
+                get: { userAnswer ?? "" },
+                set: { userAnswer = $0 }
+            ))
+            .textFieldStyle(.plain)
+            .padding()
+            .background(Color(.systemGray6))
+            .cornerRadius(12)
+            .disabled(showResults)
+        }
+    }
+    
+    @ViewBuilder
+    private var resultIcon: some View {
+        if question.questionType == .multipleChoice || question.questionType == .reading {
+            if userAnswer == question.correctAnswerText {
+                Image(systemName: "checkmark.circle.fill")
+                    .foregroundStyle(.green)
+                    .font(.title2)
+            } else {
+                Image(systemName: "xmark.circle.fill")
+                    .foregroundStyle(.red)
+                    .font(.title2)
+            }
+        } else {
+            if let eval = evaluation {
+                Image(systemName: eval.isCorrect ? "checkmark.circle.fill" : "xmark.circle.fill")
+                    .foregroundStyle(eval.isCorrect ? .green : .red)
+                    .font(.title2)
+            }
+        }
+    }
+    
+    @ViewBuilder
+    private var feedbackView: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            if question.questionType == .fillInBlank {
+                if let eval = evaluation {
+                    Text(eval.isCorrect ? "Correct!" : "Incorrect")
+                        .font(.headline)
+                        .foregroundStyle(eval.isCorrect ? .green : .red)
+                    
+                    Text(eval.feedback)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                    
+                    if !eval.isCorrect {
+                        Text("Correct Answer: \(eval.corrected_answer ?? question.correctAnswerText)")
+                            .font(.caption)
+                            .fontWeight(.bold)
+                            .foregroundStyle(.blue)
+                    }
+                }
+            } else {
+                if userAnswer != question.correctAnswerText {
+                    Text("Correct Answer: \(question.correctAnswerText)")
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                        .foregroundStyle(.green)
+                }
+            }
+        }
+        .padding()
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color(.systemGray6))
+        .cornerRadius(12)
     }
 }
