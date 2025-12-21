@@ -58,7 +58,7 @@ Your goal is to help users learn English words with accurate definitions, pronun
 
 **Your Task:**
 Generate a structured vocabulary card for the word the user asks about. You must provide:
-1. **word**: The target English word (exactly as queried, preserving capitalization if it's a proper noun)
+1. **word**: The target English word. **IMPORTANT: If the user makes a spelling mistake, CORRECT IT to the intended word.**
 2. **ipa**: IPA pronunciation notation (e.g., "/ˈtæŋ.ɡəl/")
 3. **part_of_speech**: The primary part of speech (e.g., "noun", "verb", "adjective", "adverb")
 4. **meaning_en**: A clear, concise English definition
@@ -104,7 +104,7 @@ struct WordCard: Codable {
     let ipa: String?
     let part_of_speech: String?
     let meaning_en: String?
-    let meaning_zh: String?  // Translation in \(languageName)
+    let translation: String?  // Translation in \(languageName)
     let examples: [String]?
     let word_family: [String]?
     let collocations: [String]?
@@ -506,7 +506,7 @@ func give_reply(input: String, session: LanguageModelSession) async throws -> (S
         let geminiPrompt = """
         \(getGeminiSystemPrompt())
         Generate WordCard JSON for: "\(input)"
-        - If word query: fill all fields (word, ipa, part_of_speech, meaning_en, meaning_zh, examples)
+        - If word query: fill all fields (word, ipa, part_of_speech, meaning_en, translation, examples). **If typo detected, use CORRECTED word.**
         - If general question: use extra_content only
         """
         

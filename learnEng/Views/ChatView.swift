@@ -24,6 +24,11 @@ struct ChatView: View {
                 .ignoresSafeArea()
             
             if model.availability == .available {
+                if chattingSession.isEmpty {
+                    EmptyChatStateView()
+                        .padding(.bottom, 80)
+                }
+                
                 ScrollViewReader { proxy in
                     ScrollView {
                         LazyVStack(spacing: 24) {
@@ -270,5 +275,36 @@ struct UnavailableView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color(.systemGroupedBackground))
+    }
+}
+
+struct EmptyChatStateView: View {
+    var body: some View {
+        VStack(spacing: 24) {
+            ZStack {
+                Circle()
+                    .fill(Color.accentColor.opacity(0.1))
+                    .frame(width: 100, height: 100)
+                
+                Image(systemName: "bubble.left.and.bubble.right.fill")
+                    .font(.system(size: 48))
+                    .foregroundColor(.accentColor)
+            }
+            .padding(.bottom, 8)
+            
+            VStack(spacing: 12) {
+                Text("Start a Conversation")
+                    .font(.title2)
+                    .fontWeight(.bold)
+                    .foregroundColor(.primary)
+                
+                Text("Type a word or phrase below to\nstart learning English.")
+                    .font(.body)
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+                    .lineSpacing(4)
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }

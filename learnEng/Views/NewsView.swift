@@ -10,6 +10,7 @@ struct NewsView: View {
     @State private var articlesWithAI: [NewsArticle] = []
     @State private var isGeneratingSummaries = false
     @State private var selectedCategory: String = "all"
+    @State private var loadTask: Task<Void, Never>?
     
     let categories = [
         ("all", "All News", "newspaper.fill"),
@@ -209,16 +210,22 @@ struct NewsView: View {
             .fullScreenCover(item: $selectedArticle) { article in
                 ArticleWebView(article: article)
             }
+            .onDisappear {
+                loadTask?.cancel()
+            }
         }
     }
     
     func loadNews() {
+        loadTask?.cancel()
         isLoading = true
         errorMessage = nil
         articlesWithAI = []
         
-        Task {
+        loadTask = Task {
             do {
+                if Task.isCancelled { return }
+                
                 // 構建 URL，包含類別和數量參數
                 var urlComponents = URLComponents(string: "https://raw.githubusercontent.com/YGJH/learnEng/refs/heads/main/exp/news.json")!
                 urlComponents.queryItems = [
@@ -277,6 +284,11 @@ struct NewsView: View {
         var skippedCount = 0
         
         for (index, article) in articles.enumerated() {
+            if Task.isCancelled {
+                print("🛑 Analysis cancelled")
+                break
+            }
+            
             processedCount = index + 1
             
             // 更新進度（但不顯示文章）

@@ -29,6 +29,25 @@ struct WordCardView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
+            // Typo Correction Notice
+            if let word = card.word,
+               word.lowercased().trimmingCharacters(in: .whitespaces) != query.lowercased().trimmingCharacters(in: .whitespaces) {
+                HStack(spacing: 8) {
+                    Image(systemName: "wand.and.stars")
+                        .font(.system(size: 14))
+                        .foregroundStyle(.orange)
+                    
+                    Text("Corrected from \"\(query)\"")
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                        .foregroundStyle(.orange)
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
+                .background(Color.orange.opacity(0.1))
+                .clipShape(RoundedRectangle(cornerRadius: 8))
+            }
+            
             // Header: Word, IPA, POS, Save Button
             HStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: 4) {

@@ -48,6 +48,9 @@ struct ContentView: View {
             waiting_model_reply = true
             state_img = Image(systemName: "stop.fill")
             
+            // Reset session for each new message to avoid context window issues
+            model_session = LanguageModelSession(tools: [DictionaryTool()])
+            
             let newMessage = ChatMessage(query: query, reply: "")
             chattingSession.append(newMessage)
             

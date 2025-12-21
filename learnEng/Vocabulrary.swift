@@ -95,6 +95,16 @@ struct VocabularyCard: View {
                     .fontWeight(.bold)
                     .foregroundStyle(.primary)
                 
+                Image(systemName: "speaker.wave.2.circle.fill")
+                    .foregroundStyle(.blue)
+                    .font(.title3)
+                    .highPriorityGesture(
+                        TapGesture()
+                            .onEnded { _ in
+                                SpeechSynthesizer.shared.speak(item.word ?? item.query)
+                            }
+                    )
+                
                 if let pos = item.part_of_speech {
                     Text(pos)
                         .font(.caption)
@@ -207,6 +217,7 @@ struct BadgeView: View {
     }
 }
 
+
 struct VocabularyDetailView: View {
     let item: Item
     @Environment(\.dismiss) var dismiss
@@ -223,6 +234,14 @@ struct VocabularyDetailView: View {
                                 .font(.largeTitle)
                                 .fontWeight(.heavy)
                                 .foregroundStyle(.primary)
+                            
+                            Button {
+                                SpeechSynthesizer.shared.speak(item.word ?? item.query)
+                            } label: {
+                                Image(systemName: "speaker.wave.2.circle.fill")
+                                    .font(.title)
+                                    .foregroundStyle(.blue)
+                            }
                             
                             if let ipa = item.ipa {
                                 Text(ipa)

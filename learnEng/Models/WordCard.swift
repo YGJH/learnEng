@@ -19,7 +19,7 @@ struct WordCard: Codable {
         case ipa
         case part_of_speech
         case meaning_en
-        case translation = "meaning_zh"  // Keep JSON key for backward compatibility
+        case translation
         case examples
         case word_family
         case collocations
