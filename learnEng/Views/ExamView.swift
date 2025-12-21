@@ -453,9 +453,33 @@ struct ExamView: View {
         
         Task {
             // Pick random 5 words
-            let shuffled = items.shuffled()
-            let count = min(items.count, 5)
-            let selected = Array(shuffled.prefix(count)).map { $0.word ?? $0.query }
+            // Prioritize favorite items
+            let favoriteItems = items.filter { $0.isFavorite }
+            let normalItems = items.filter { !$0.isFavorite }
+            
+            var selectedItems: [Item] = []
+            
+            // Try to include at least 2 favorites if available
+            if !favoriteItems.isEmpty {
+                let favoritesCount = min(favoriteItems.count, 2)
+                selectedItems.append(contentsOf: favoriteItems.shuffled().prefix(favoritesCount))
+            }
+            
+            // Fill the rest with normal items
+            let remainingCount = 5 - selectedItems.count
+            if remainingCount > 0 && !normalItems.isEmpty {
+                selectedItems.append(contentsOf: normalItems.shuffled().prefix(remainingCount))
+            }
+            
+            // If we still don't have 5, add more favorites if possible
+            if selectedItems.count < 5 && favoriteItems.count > 2 {
+                let usedFavorites = Set(selectedItems.compactMap { $0.word ?? $0.query })
+                let unusedFavorites = favoriteItems.filter { !usedFavorites.contains($0.word ?? $0.query) }
+                let needed = 5 - selectedItems.count
+                selectedItems.append(contentsOf: unusedFavorites.shuffled().prefix(needed))
+            }
+            
+            let selected = selectedItems.map { $0.word ?? $0.query }.shuffled()
             
             do {
                 let newQuestions = try await generateExam(words: selected, session: session)

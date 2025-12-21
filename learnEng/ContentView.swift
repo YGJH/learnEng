@@ -106,108 +106,93 @@ struct ContentView: View {
  
     var body: some View {
         GeometryReader { proxy in
-            ZStack(alignment: .topLeading) {
-                VStack(alignment: .leading) {
-                    // Placeholder for the button space if needed, or just padding
-                    // Since the button is now floating, we might need to add top padding to the content
-                    // so it doesn't get hidden behind the button.
-                    // However, for "Chat", the button was part of the flow.
-                    // Let's add a spacer or padding.
-                    
-                    if selectedPage == "Chat" {
-                        // Add padding for the floating button
-                        Color.clear.frame(height: 60)
-                        
-                        ChatView(
-                            userInput: $user_input,
-                            chattingSession: $chattingSession,
-                            waitingModelReply: $waiting_model_reply,
-                            stateImg: $state_img,
-                            modelSession: $model_session,
-                            model: model,
-                            onSendMessage: sendMessage
-                        )
-                    } else if selectedPage == "Vocabulrary" {
-                        // Add padding for the floating button
-                        Color.clear.frame(height: 60)
-                        VocabulraryView()
-                    } else if selectedPage == "Exam" {
-                        // Add padding for the floating button
-                        Color.clear.frame(height: 60)
-                        ExamView()
-                    } else if selectedPage == "ScanExam" {
-                        Color.clear.frame(height: 60)
-                        ScanExamView()
-                    } else if selectedPage == "News" {
-                        Color.clear.frame(height: 60)
-                        NewsView()
-                    } else if selectedPage == "Settings" {
-                        Color.clear.frame(height: 60)
-                        SettingsView()
-                    } else if selectedPage == "Writing" {
-                        Color.clear.frame(height: 60)
-                        WritingView()
-                    } else {
-                        // Add padding for the floating button
-                        Color.clear.frame(height: 60)
-                        Text(selectedPage)
-                            .font(.largeTitle)
-                            .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    }
-                }
-                .disabled(show_panel)
-//                .padding()
-                
-                // Floating Menu Button
-                Button {
-                    withAnimation {
-                        show_panel.toggle()
-                    }
-                } label: {
-                    Image(systemName: "list.dash")
-                        .font(.system(size: 30))
-                }
-                .padding()
-                .zIndex(3) // Ensure it's above everything
-                
+            HStack(spacing: 0) {
+                // Sidebar Control Panel
                 if show_panel {
-                    Color.black.opacity(0.3)
-                        .frame(width: proxy.size.width, height: proxy.size.height)
-                        .ignoresSafeArea()
-                        .contentShape(Rectangle())
-                        .onTapGesture {
-                            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-                            withAnimation {
-                                show_panel = false
-                            }
+                    ControlPanel(selectedPage: $selectedPage, showPanel: $show_panel)
+                        .frame(width: 260)
+                        .frame(maxHeight: .infinity)
+                        .background(Color(.systemBackground))
+                        .transition(.move(edge: .leading))
+                        .zIndex(2)
+                }
+                
+                // Main Content
+                ZStack(alignment: .topLeading) {
+                    VStack(alignment: .leading) {
+                        if selectedPage == "Chat" {
+                            Color.clear.frame(height: 60)
+                            ChatView(
+                                userInput: $user_input,
+                                chattingSession: $chattingSession,
+                                waitingModelReply: $waiting_model_reply,
+                                stateImg: $state_img,
+                                modelSession: $model_session,
+                                model: model,
+                                onSendMessage: sendMessage
+                            )
+                        } else if selectedPage == "Vocabulrary" {
+                            Color.clear.frame(height: 60)
+                            VocabulraryView()
+                        } else if selectedPage == "Exam" {
+                            Color.clear.frame(height: 60)
+                            ExamView()
+                        } else if selectedPage == "ScanExam" {
+                            Color.clear.frame(height: 60)
+                            ScanExamView()
+                        } else if selectedPage == "News" {
+                            Color.clear.frame(height: 60)
+                            NewsView()
+                        } else if selectedPage == "Settings" {
+                            Color.clear.frame(height: 60)
+                            SettingsView()
+                        } else if selectedPage == "Writing" {
+                            Color.clear.frame(height: 60)
+                            WritingView()
+                        } else {
+                            Color.clear.frame(height: 60)
+                            Text(selectedPage)
+                                .font(.largeTitle)
+                                .frame(maxWidth: .infinity, maxHeight: .infinity)
                         }
-                        .transition(.opacity)
-                        .zIndex(1)
+                    }
+                    
+                    // Floating Menu Button
+                    Button {
+                        withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
+                            show_panel.toggle()
+                        }
+                    } label: {
+                        Image(systemName: show_panel ? "sidebar.left" : "list.dash")
+                            .font(.system(size: 24, weight: .semibold))
+                            .foregroundColor(.primary)
+                            .frame(width: 44, height: 44)
+                            .background(Color(.systemBackground).opacity(0.8))
+                            .clipShape(Circle())
+                            .shadow(radius: 2)
+                    }
+                    .padding(.leading, 16)
+                    .padding(.top, 8)
+                    .zIndex(3)
+                    
+                    // Help Button (Top Right)
+                    Button {
+                        showOnboarding = true
+                    } label: {
+                        Image(systemName: "questionmark.circle")
+                            .font(.title2)
+                            .foregroundStyle(.secondary)
+                            .padding()
+                            .background(Color(uiColor: .systemBackground).opacity(0.8))
+                            .clipShape(Circle())
+                            .shadow(radius: 2)
+                    }
+                    .padding()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+                    .zIndex(1)
                 }
-                
-                ControlPanel(selectedPage: $selectedPage, showPanel: $show_panel)
-//                    .frame(width: proxy.size.width * 0.4, height: proxy.size.height, alignment: .topLeading)
-                    .frame(width: show_panel ? 0.4 * proxy.size.width : 0, height: proxy.size.height, alignment: .topLeading)
-                    .cornerRadius(20)
-                    .zIndex(2)
-                
-                // Help Button (Top Right)
-                Button {
-                    showOnboarding = true
-                } label: {
-                    Image(systemName: "questionmark.circle")
-                        .font(.title2)
-                        .foregroundStyle(.secondary)
-                        .padding()
-                        .background(Color(uiColor: .systemBackground).opacity(0.8))
-                        .clipShape(Circle())
-                        .shadow(radius: 2)
-                }
-                .padding()
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
-                .zIndex(1)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
-            .frame(width: proxy.size.width, height: proxy.size.height)
         }
         .background(Color(.secondarySystemBackground))
         .fullScreenCover(isPresented: $showOnboarding) {

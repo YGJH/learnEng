@@ -259,9 +259,22 @@ struct FlashCardView: View {
         print("✅ Items with either: \(itemsWithMeaning.count)")
         
         // 隨機排序並取最多 30 個
-        let shuffled = itemsWithMeaning.shuffled()
-        let count = min(shuffled.count, 30)
-        let selected = Array(shuffled.prefix(count))
+        // Prioritize favorites
+        let favoriteItems = itemsWithMeaning.filter { $0.isFavorite }
+        let normalItems = itemsWithMeaning.filter { !$0.isFavorite }
+        
+        var selectedItems: [Item] = []
+        
+        // Include all favorites (up to 15)
+        selectedItems.append(contentsOf: favoriteItems.shuffled().prefix(15))
+        
+        // Fill the rest with normal items up to 30
+        let remainingSpace = 30 - selectedItems.count
+        if remainingSpace > 0 {
+            selectedItems.append(contentsOf: normalItems.shuffled().prefix(remainingSpace))
+        }
+        
+        let selected = selectedItems.shuffled()
         
         cards = selected.map { item in
             // 優先使用 translation，如果沒有則使用 meaning_en
@@ -272,7 +285,8 @@ struct FlashCardView: View {
             
             return FlashCard(
                 word: cardWord,
-                translation: meaning
+                translation: meaning,
+                isFavorite: item.isFavorite
             )
         }
         
@@ -406,6 +420,13 @@ struct CardView: View {
                     .shadow(color: .black.opacity(0.2), radius: 10, x: 0, y: 5)
                 
                 VStack(spacing: 20) {
+                    if card.isFavorite {
+                        Image(systemName: "star.fill")
+                            .font(.title)
+                            .foregroundStyle(.orange)
+                            .padding(.bottom, -10)
+                    }
+                    
                     Image(systemName: "character.book.closed.fill")
                         .font(.system(size: 40))
                         .foregroundStyle(.blue)
@@ -435,6 +456,7 @@ struct FlashCard: Identifiable {
     let id = UUID()
     let word: String
     let translation: String
+    var isFavorite: Bool = false
 }
 
 #Preview {

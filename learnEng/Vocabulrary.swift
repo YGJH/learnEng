@@ -1,20 +1,34 @@
 import SwiftUI
 import SwiftData
+import Foundation
 
 struct VocabulraryView: View {
-    @Query(sort: \Item.timestamp, order: .reverse) private var items: [Item]
+    @Query private var items: [Item]
     @Environment(\.modelContext) private var modelContext
     @State private var selectedItem: Item?
     @State private var searchText = ""
     
+    /// NOTE:
+    /// SwiftData's `Query(sort:)` can sometimes resolve to a Foundation `SortDescriptor` overload
+    /// that requires `NSObject`. To keep this robust, we fetch without sort here and do a stable
+    /// in-memory sort (favorites first, then newest).
+    
     var filteredItems: [Item] {
-        if searchText.isEmpty {
-            return items
-        } else {
-            return items.filter { item in
-                (item.word ?? item.query).localizedCaseInsensitiveContains(searchText) ||
-                (item.translation ?? "").localizedCaseInsensitiveContains(searchText)
+        let base = items
+            .sorted {
+                if $0.isFavorite != $1.isFavorite {
+                    return $0.isFavorite && !$1.isFavorite
+                }
+                return $0.timestamp > $1.timestamp
             }
+
+        if searchText.isEmpty {
+            return base
+        }
+
+        return base.filter { item in
+            (item.word ?? item.query).localizedCaseInsensitiveContains(searchText) ||
+            (item.translation ?? "").localizedCaseInsensitiveContains(searchText)
         }
     }
 
@@ -48,12 +62,14 @@ struct VocabulraryView: View {
                             .padding(.top)
                             
                             ForEach(Array(filteredItems.enumerated()), id: \.element.id) { index, item in
-                                Button {
+                                VocabularyCard(item: item, index: index, onDelete: {
+                                    deleteItem(item)
+                                }, onToggleFavorite: {
+                                    toggleFavorite(item)
+                                })
+                                .onTapGesture {
                                     selectedItem = item
-                                } label: {
-                                    VocabularyCard(item: item, index: index)
                                 }
-                                .buttonStyle(ScaleButtonStyle())
                             }
                         }
                         .padding(.bottom, 100)
@@ -72,6 +88,12 @@ struct VocabulraryView: View {
             modelContext.delete(item)
         }
     }
+    
+    private func toggleFavorite(_ item: Item) {
+        withAnimation {
+            item.isFavorite.toggle()
+        }
+    }
 }
 
 struct ScaleButtonStyle: ButtonStyle {
@@ -85,6 +107,8 @@ struct ScaleButtonStyle: ButtonStyle {
 struct VocabularyCard: View {
     let item: Item
     let index: Int
+    let onDelete: () -> Void
+    let onToggleFavorite: () -> Void
     @State private var isVisible = false
     
     var body: some View {
@@ -93,7 +117,13 @@ struct VocabularyCard: View {
                 Text(item.word ?? item.query)
                     .font(.title2)
                     .fontWeight(.bold)
-                    .foregroundStyle(.primary)
+                    .foregroundStyle(item.isFavorite ? .orange : .primary)
+                
+                if item.isFavorite {
+                    Image(systemName: "star.fill")
+                        .foregroundStyle(.orange)
+                        .font(.headline)
+                }
                 
                 Image(systemName: "speaker.wave.2.circle.fill")
                     .foregroundStyle(.blue)
@@ -118,9 +148,29 @@ struct VocabularyCard: View {
                 
                 Spacer()
                 
-                Image(systemName: "chevron.right")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                HStack(spacing: 12) {
+                    Button(action: onToggleFavorite) {
+                        Image(systemName: item.isFavorite ? "star.fill" : "star")
+                            .font(.system(size: 16))
+                            .foregroundStyle(item.isFavorite ? .orange : .secondary)
+                            .padding(8)
+                            .background(item.isFavorite ? Color.orange.opacity(0.1) : Color.secondary.opacity(0.1))
+                            .clipShape(Circle())
+                    }
+                    
+                    Button(action: onDelete) {
+                        Image(systemName: "trash")
+                            .font(.system(size: 16))
+                            .foregroundStyle(.red.opacity(0.8))
+                            .padding(8)
+                            .background(Color.red.opacity(0.1))
+                            .clipShape(Circle())
+                    }
+                    
+                    Image(systemName: "chevron.right")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
             }
             
             Divider()
@@ -188,7 +238,11 @@ struct VocabularyCard: View {
         .background(
             RoundedRectangle(cornerRadius: 20)
                 .fill(Color(.systemBackground))
-                .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 5)
+                .shadow(color: item.isFavorite ? Color.orange.opacity(0.2) : Color.black.opacity(0.05), radius: item.isFavorite ? 15 : 10, x: 0, y: 5)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 20)
+                        .stroke(item.isFavorite ? Color.orange.opacity(0.3) : Color.clear, lineWidth: 2)
+                )
         )
         .padding(.horizontal)
         .offset(y: isVisible ? 0 : 50)

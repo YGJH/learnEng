@@ -22,8 +22,9 @@ final class Item {
     var collocations: [String]?
     var nuance: String?
     var extra_content: String?
+    var isFavorite: Bool = false
     
-    init(timestamp: Date = Date(), query: String = "", word: String? = nil, ipa: String? = nil, part_of_speech: String? = nil, meaning_en: String? = nil, translation: String? = nil, examples: [String]? = nil, word_family: [String]? = nil, collocations: [String]? = nil, nuance: String? = nil, extra_content: String? = nil) {
+    init(timestamp: Date = Date(), query: String = "", word: String? = nil, ipa: String? = nil, part_of_speech: String? = nil, meaning_en: String? = nil, translation: String? = nil, examples: [String]? = nil, word_family: [String]? = nil, collocations: [String]? = nil, nuance: String? = nil, extra_content: String? = nil, isFavorite: Bool = false) {
         self.timestamp = timestamp
         self.query = query
         self.word = word
@@ -36,5 +37,6 @@ final class Item {
         self.collocations = collocations
         self.nuance = nuance
         self.extra_content = extra_content
+        self.isFavorite = isFavorite
     }
 }
