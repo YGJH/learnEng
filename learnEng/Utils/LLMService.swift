@@ -1134,3 +1134,104 @@ func generateNewsSummary(title: String, summary: String, session: LanguageModelS
     }
     return analysis.summary
 }
+
+// MARK: - Streaming Support
+
+func streamResponse(prompt: String, session: LanguageModelSession) -> AsyncThrowingStream<String, Error> {
+    AsyncThrowingStream { continuation in
+        Task {
+            let selectedModel = UserDefaults.standard.string(forKey: "selectedModel") ?? "local"
+            
+            if selectedModel == "local" {
+                // Assuming session.stream exists for local model
+                // If not, we can't stream local model easily without the API
+                // But usually FoundationModels has it.
+                // Let's try to use it.
+                do {
+                    // Local model streaming is not currently supported by LanguageModelSession in this version.
+                    // Fallback to non-streaming response.
+                    let response = try await session.respond(to: prompt)
+                    continuation.yield(response.content)
+                    continuation.finish()
+                } catch {
+                    continuation.finish(throwing: error)
+                }
+            } else {
+                // Gemini Streaming
+                let apiKey = UserDefaults.standard.string(forKey: "geminiApiKey") ?? ""
+                guard !apiKey.isEmpty else {
+                    continuation.finish(throwing: LLMError.missingApiKey)
+                    return
+                }
+                
+                do {
+                    for try await token in callGeminiStream(prompt: prompt, model: selectedModel, apiKey: apiKey) {
+                        continuation.yield(token)
+                    }
+                    continuation.finish()
+                } catch {
+                    continuation.finish(throwing: error)
+                }
+            }
+        }
+    }
+}
+
+private func callGeminiStream(prompt: String, model: String, apiKey: String) -> AsyncThrowingStream<String, Error> {
+    AsyncThrowingStream { continuation in
+        Task {
+            guard let url = URL(string: "https://generativelanguage.googleapis.com/v1beta/models/\(model):streamGenerateContent?alt=sse") else {
+                continuation.finish(throwing: URLError(.badURL))
+                return
+            }
+            
+            var request = URLRequest(url: url)
+            request.httpMethod = "POST"
+            request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.addValue(apiKey, forHTTPHeaderField: "x-goog-api-key")
+            
+            let body: [String: Any] = [
+                "contents": [
+                    ["parts": [["text": prompt]]]
+                ]
+            ]
+            request.httpBody = try? JSONSerialization.data(withJSONObject: body)
+            
+            do {
+                let (bytes, response) = try await URLSession.shared.bytes(for: request)
+                
+                guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+                    continuation.finish(throwing: URLError(.badServerResponse))
+                    return
+                }
+                
+                for try await line in bytes.lines {
+                    if line.hasPrefix("data: ") {
+                        let json = line.dropFirst(6)
+                        if let data = json.data(using: .utf8),
+                           let response = try? JSONDecoder().decode(GeminiStreamResponse.self, from: data),
+                           let text = response.candidates?.first?.content.parts.first?.text {
+                            continuation.yield(text)
+                        }
+                    }
+                }
+                continuation.finish()
+            } catch {
+                continuation.finish(throwing: error)
+            }
+        }
+    }
+}
+
+struct GeminiStreamResponse: Decodable {
+    struct Candidate: Decodable {
+        struct Content: Decodable {
+            struct Part: Decodable {
+                let text: String
+            }
+            let parts: [Part]
+        }
+        let content: Content
+    }
+    let candidates: [Candidate]?
+}

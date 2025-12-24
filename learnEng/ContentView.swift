@@ -106,64 +106,68 @@ struct ContentView: View {
  
     var body: some View {
         GeometryReader { proxy in
-            HStack(spacing: 0) {
-                // Sidebar Control Panel
-                if show_panel {
-                    ControlPanel(selectedPage: $selectedPage, showPanel: $show_panel)
-                        .frame(width: 260)
-                        .frame(maxHeight: .infinity)
-                        .background(Color(.systemBackground))
-                        .transition(.move(edge: .leading))
-                        .zIndex(2)
-                }
-                
+            ZStack(alignment: .leading) {
                 // Main Content
-                ZStack(alignment: .topLeading) {
-                    VStack(alignment: .leading) {
-                        if selectedPage == "Chat" {
-                            Color.clear.frame(height: 60)
-                            ChatView(
-                                userInput: $user_input,
-                                chattingSession: $chattingSession,
-                                waitingModelReply: $waiting_model_reply,
-                                stateImg: $state_img,
-                                modelSession: $model_session,
-                                model: model,
-                                onSendMessage: sendMessage
-                            )
-                        } else if selectedPage == "Vocabulrary" {
-                            Color.clear.frame(height: 60)
-                            VocabulraryView()
-                        } else if selectedPage == "Exam" {
-                            Color.clear.frame(height: 60)
-                            ExamView()
-                        } else if selectedPage == "ScanExam" {
-                            Color.clear.frame(height: 60)
-                            ScanExamView()
-                        } else if selectedPage == "News" {
-                            Color.clear.frame(height: 60)
-                            NewsView()
-                        } else if selectedPage == "Settings" {
-                            Color.clear.frame(height: 60)
-                            SettingsView()
-                        } else if selectedPage == "Writing" {
-                            Color.clear.frame(height: 60)
-                            WritingView()
-                        } else {
-                            Color.clear.frame(height: 60)
-                            Text(selectedPage)
-                                .font(.largeTitle)
-                                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                ZStack {
+                    if !show_panel {
+                        Button {
+                            withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
+                                show_panel.toggle()
+                            }
+                        } label: {
+                            Image(systemName: "list.dash")
+                                .font(.system(size: 24, weight: .semibold))
+                                .foregroundColor(.primary)
+                                .frame(width: 44, height: 44)
+                                .background(Color(.systemBackground).opacity(0.8))
+                                .clipShape(Circle())
+                                .shadow(radius: 2)
                         }
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                        .zIndex(1)
+                        .padding()
                     }
-                    
-                    // Floating Menu Button
+
+                    if selectedPage == "Chat" {
+                        Color.clear.frame(height: 60)
+                        ChatView(
+                            userInput: $user_input,
+                            chattingSession: $chattingSession,
+                            waitingModelReply: $waiting_model_reply,
+                            stateImg: $state_img,
+                            modelSession: $model_session,
+                            model: model,
+                            onSendMessage: sendMessage
+                        )
+                    } else if selectedPage == "Vocabulrary" {
+                        Color.clear.frame(height: 60)
+                        VocabulraryView()
+                    } else if selectedPage == "Exam" {
+                        Color.clear.frame(height: 60)
+                        ExamView()
+                    } else if selectedPage == "ScanExam" {
+                        Color.clear.frame(height: 60)
+                        ScanExamView()
+                    } else if selectedPage == "News" {
+                        Color.clear.frame(height: 60)
+                        NewsView()
+                    } else if selectedPage == "Settings" {
+                        Color.clear.frame(height: 60)
+                        SettingsView()
+                    } else if selectedPage == "Writing" {
+                        Color.clear.frame(height: 60)
+                        WritingView()
+                    } else {
+                        Color.clear.frame(height: 60)
+                        Text(selectedPage)
+                            .font(.largeTitle)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    }
+
                     Button {
-                        withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
-                            show_panel.toggle()
-                        }
+                        showOnboarding = true
                     } label: {
-                        Image(systemName: show_panel ? "sidebar.left" : "list.dash")
+                        Image(systemName: "questionmark.circle")
                             .font(.system(size: 24, weight: .semibold))
                             .foregroundColor(.primary)
                             .frame(width: 44, height: 44)
@@ -171,30 +175,25 @@ struct ContentView: View {
                             .clipShape(Circle())
                             .shadow(radius: 2)
                     }
-                    .padding(.leading, 16)
-                    .padding(.top, 8)
-                    .zIndex(3)
-                    
-                    // Help Button (Top Right)
-                    Button {
-                        showOnboarding = true
-                    } label: {
-                        Image(systemName: "questionmark.circle")
-                            .font(.title2)
-                            .foregroundStyle(.secondary)
-                            .padding()
-                            .background(Color(uiColor: .systemBackground).opacity(0.8))
-                            .clipShape(Circle())
-                            .shadow(radius: 2)
-                    }
-                    .padding()
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
                     .zIndex(1)
+                    .padding()
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .offset(x: show_panel ? 280 : 0)
+                
+                // Sidebar Control Panel
+                if show_panel {
+                    ControlPanel(selectedPage: $selectedPage, showPanel: $show_panel)
+                        .frame(width: 280)
+                        .frame(maxHeight: .infinity)
+                        .transition(.move(edge: .leading))
+                        .ignoresSafeArea()
+                        .zIndex(2)
+                }
             }
         }
-        .background(Color(.secondarySystemBackground))
+        .background(Color(.secondarySystemBackground).ignoresSafeArea())
         .fullScreenCover(isPresented: $showOnboarding) {
             OnboardingView(showOnboarding: $showOnboarding)
         }

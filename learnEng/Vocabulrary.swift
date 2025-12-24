@@ -39,6 +39,13 @@ struct VocabulraryView: View {
                 Color(.systemGroupedBackground)
                     .ignoresSafeArea()
                 
+                LinearGradient(
+                    colors: [Color.blue.opacity(0.05), Color.purple.opacity(0.05)],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+                .ignoresSafeArea()
+                
                 if items.isEmpty {
                     ContentUnavailableView(
                         "No Vocabulary Yet",
@@ -47,7 +54,7 @@ struct VocabulraryView: View {
                     )
                 } else {
                     ScrollView {
-                        LazyVStack(spacing: 16) {
+                        LazyVStack(spacing: 20) {
                             // Search Bar
                             HStack {
                                 Image(systemName: "magnifyingglass")
@@ -55,8 +62,8 @@ struct VocabulraryView: View {
                                 TextField("Search words...", text: $searchText)
                             }
                             .padding()
-                            .background(Color(.systemBackground))
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                            .background(.ultraThinMaterial)
+                            .clipShape(RoundedRectangle(cornerRadius: 16))
                             .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
                             .padding(.horizontal)
                             .padding(.top)
@@ -112,51 +119,50 @@ struct VocabularyCard: View {
     @State private var isVisible = false
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Text(item.word ?? item.query)
-                    .font(.title2)
-                    .fontWeight(.bold)
-                    .foregroundStyle(item.isFavorite ? .orange : .primary)
-                
-                if item.isFavorite {
-                    Image(systemName: "star.fill")
-                        .foregroundStyle(.orange)
-                        .font(.headline)
-                }
-                
-                Image(systemName: "speaker.wave.2.circle.fill")
-                    .foregroundStyle(.blue)
-                    .font(.title3)
-                    .highPriorityGesture(
-                        TapGesture()
-                            .onEnded { _ in
-                                SpeechSynthesizer.shared.speak(item.word ?? item.query)
-                            }
-                    )
-                
-                if let pos = item.part_of_speech {
-                    Text(pos)
-                        .font(.caption)
-                        .fontWeight(.bold)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(Color.blue.opacity(0.1))
-                        .foregroundStyle(.blue)
-                        .clipShape(Capsule())
+        VStack(alignment: .leading, spacing: 16) {
+            HStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack(spacing: 8) {
+                        Text(item.word ?? item.query)
+                            .font(.system(size: 22, weight: .bold, design: .rounded))
+                            .foregroundStyle(item.isFavorite ? .orange : .primary)
+                        
+                        Button(action: onToggleFavorite) {
+                            Image(systemName: item.isFavorite ? "star.fill" : "star")
+                                .font(.system(size: 16))
+                                .foregroundStyle(item.isFavorite ? .orange : .secondary)
+                                .padding(8)
+                                .background(item.isFavorite ? Color.orange.opacity(0.1) : Color.secondary.opacity(0.1))
+                                .clipShape(Circle())
+                        }
+                        Button(action: {
+                            SpeechSynthesizer.shared.speak(item.word ?? item.query)
+                        }) {
+                            Image(systemName: "speaker.wave.2.circle.fill")
+                                .font(.title2)
+                                .foregroundStyle(.blue.opacity(0.8))
+                        }
+                    
+
+                    }
+                    
+                    if let pos = item.part_of_speech {
+                        Text(pos)
+                            .font(.caption)
+                            .fontWeight(.bold)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(Color.blue.opacity(0.1))
+                            .foregroundStyle(.blue)
+                            .clipShape(Capsule())
+                    }
+
                 }
                 
                 Spacer()
                 
-                HStack(spacing: 12) {
-                    Button(action: onToggleFavorite) {
-                        Image(systemName: item.isFavorite ? "star.fill" : "star")
-                            .font(.system(size: 16))
-                            .foregroundStyle(item.isFavorite ? .orange : .secondary)
-                            .padding(8)
-                            .background(item.isFavorite ? Color.orange.opacity(0.1) : Color.secondary.opacity(0.1))
-                            .clipShape(Circle())
-                    }
+                HStack(spacing: 8) {
+
                     
                     Button(action: onDelete) {
                         Image(systemName: "trash")
@@ -166,57 +172,59 @@ struct VocabularyCard: View {
                             .background(Color.red.opacity(0.1))
                             .clipShape(Circle())
                     }
-                    
-                    Image(systemName: "chevron.right")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
                 }
             }
             
             Divider()
+                .background(Color.gray.opacity(0.2))
             
-            if let meaningEn = item.meaning_en {
-                HStack(alignment: .top, spacing: 8) {
-                    Image(systemName: "book.closed")
-                        .foregroundStyle(.blue)
-                        .font(.caption)
-                        .padding(.top, 2)
-                    
-                    Text(meaningEn)
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(2)
-                        .multilineTextAlignment(.leading)
+            VStack(alignment: .leading, spacing: 12) {
+                if let meaningEn = item.meaning_en {
+                    HStack(alignment: .top, spacing: 12) {
+                        Image(systemName: "book.closed")
+                            .foregroundStyle(.blue)
+                            .font(.caption)
+                            .padding(.top, 2)
+                            .frame(width: 20)
+                        
+                        Text(meaningEn)
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(2)
+                            .multilineTextAlignment(.leading)
+                    }
                 }
-            }
-            
-            if let translation = item.translation {
-                HStack(alignment: .top, spacing: 8) {
-                    Image(systemName: "globe")
-                        .foregroundStyle(.red)
-                        .font(.caption)
-                        .padding(.top, 2)
-                    
-                    Text(translation)
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(2)
-                        .multilineTextAlignment(.leading)
+                
+                if let translation = item.translation {
+                    HStack(alignment: .top, spacing: 12) {
+                        Image(systemName: "globe")
+                            .foregroundStyle(.red)
+                            .font(.caption)
+                            .padding(.top, 2)
+                            .frame(width: 20)
+                        
+                        Text(translation)
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(2)
+                            .multilineTextAlignment(.leading)
+                    }
                 }
-            }
-            
-            if let examples = item.examples, let firstExample = examples.first {
-                HStack(alignment: .top, spacing: 8) {
-                    Image(systemName: "quote.opening")
-                        .foregroundStyle(.green)
-                        .font(.caption)
-                        .padding(.top, 2)
-                    
-                    Text(firstExample)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .italic()
-                        .lineLimit(1)
+                
+                if let examples = item.examples, let firstExample = examples.first {
+                    HStack(alignment: .top, spacing: 12) {
+                        Image(systemName: "quote.opening")
+                            .foregroundStyle(.green)
+                            .font(.caption)
+                            .padding(.top, 2)
+                            .frame(width: 20)
+                        
+                        Text(firstExample)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .italic()
+                            .lineLimit(2)
+                    }
                 }
             }
             
@@ -234,14 +242,14 @@ struct VocabularyCard: View {
             }
             .padding(.top, 4)
         }
-        .padding()
+        .padding(20)
         .background(
-            RoundedRectangle(cornerRadius: 20)
+            RoundedRectangle(cornerRadius: 24)
                 .fill(Color(.systemBackground))
-                .shadow(color: item.isFavorite ? Color.orange.opacity(0.2) : Color.black.opacity(0.05), radius: item.isFavorite ? 15 : 10, x: 0, y: 5)
+                .shadow(color: item.isFavorite ? Color.orange.opacity(0.15) : Color.black.opacity(0.05), radius: 15, x: 0, y: 8)
                 .overlay(
-                    RoundedRectangle(cornerRadius: 20)
-                        .stroke(item.isFavorite ? Color.orange.opacity(0.3) : Color.clear, lineWidth: 2)
+                    RoundedRectangle(cornerRadius: 24)
+                        .stroke(item.isFavorite ? Color.orange.opacity(0.3) : Color.white.opacity(0.5), lineWidth: 1)
                 )
         )
         .padding(.horizontal)
@@ -264,8 +272,8 @@ struct BadgeView: View {
             .font(.caption2)
             .fontWeight(.bold)
             .foregroundStyle(color)
-            .padding(.horizontal, 8)
-            .padding(.vertical, 4)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 5)
             .background(color.opacity(0.1))
             .clipShape(Capsule())
     }
@@ -280,148 +288,172 @@ struct VocabularyDetailView: View {
     
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 24) {
-                    VStack(alignment: .leading, spacing: 8) {
-                        HStack {
-                            Text(item.word ?? item.query)
-                                .font(.largeTitle)
-                                .fontWeight(.heavy)
-                                .foregroundStyle(.primary)
-                            
-                            Button {
-                                SpeechSynthesizer.shared.speak(item.word ?? item.query)
-                            } label: {
-                                Image(systemName: "speaker.wave.2.circle.fill")
-                                    .font(.title)
-                                    .foregroundStyle(.blue)
+            ZStack {
+                Color(.systemGroupedBackground)
+                    .ignoresSafeArea()
+                
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 24) {
+                        // Header Card
+                        VStack(alignment: .leading, spacing: 16) {
+                            HStack {
+                                Text(item.word ?? item.query)
+                                    .font(.system(size: 36, weight: .heavy, design: .rounded))
+                                    .foregroundStyle(.primary)
+                                
+                                Spacer()
+                                
+                                Button {
+                                    SpeechSynthesizer.shared.speak(item.word ?? item.query)
+                                } label: {
+                                    Image(systemName: "speaker.wave.2.circle.fill")
+                                        .font(.system(size: 32))
+                                        .foregroundStyle(.blue)
+                                        .shadow(color: .blue.opacity(0.3), radius: 8)
+                                }
                             }
                             
-                            if let ipa = item.ipa {
-                                Text(ipa)
-                                    .font(.title3)
-                                    .foregroundStyle(.secondary)
-                                    .monospaced()
+                            HStack {
+                                if let pos = item.part_of_speech {
+                                    Text(pos)
+                                        .font(.headline)
+                                        .foregroundStyle(.white)
+                                        .padding(.horizontal, 12)
+                                        .padding(.vertical, 6)
+                                        .background(Color.blue)
+                                        .clipShape(Capsule())
+                                }
+                                
+                                if let ipa = item.ipa {
+                                    Text(ipa)
+                                        .font(.title3)
+                                        .foregroundStyle(.secondary)
+                                        .monospaced()
+                                }
+                            }
+                            
+                            Text("Added on \(item.timestamp.formatted(date: .long, time: .omitted))")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        .padding(24)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(Color(.systemBackground))
+                        .clipShape(RoundedRectangle(cornerRadius: 24))
+                        .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 5)
+                        
+                        if let meaningEn = item.meaning_en {
+                            DetailSection(icon: "book.closed.fill", title: "DEFINITION (EN)", color: .blue) {
+                                Text(meaningEn)
+                                    .font(.body)
+                                    .lineSpacing(6)
                             }
                         }
                         
-                        if let pos = item.part_of_speech {
-                            Text(pos)
-                                .font(.headline)
-                                .foregroundStyle(.blue)
+                        if let translation = item.translation {
+                            DetailSection(icon: "globe", title: "TRANSLATION", color: .red) {
+                                Text(translation)
+                                    .font(.body)
+                                    .lineSpacing(6)
+                            }
                         }
                         
-                        Text(item.timestamp, style: .date)
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                    }
-                    .padding(.bottom)
-                    
-                    if let meaningEn = item.meaning_en {
-                        DetailSection(icon: "book.closed.fill", title: "DEFINITION (EN)", color: .blue) {
-                            Text(meaningEn)
-                                .font(.body)
-                                .lineSpacing(6)
+                        if let nuance = item.nuance {
+                            DetailSection(icon: "lightbulb.max.fill", title: "NUANCE", color: .yellow) {
+                                Text(nuance)
+                                    .font(.body)
+                                    .italic()
+                            }
                         }
-                    }
-                    
-                    if let translation = item.translation {
-                        DetailSection(icon: "globe", title: "TRANSLATION", color: .red) {
-                            Text(translation)
-                                .font(.body)
-                                .lineSpacing(6)
-                        }
-                    }
-                    
-                    if let nuance = item.nuance {
-                        DetailSection(icon: "lightbulb.max.fill", title: "NUANCE", color: .yellow) {
-                            Text(nuance)
-                                .font(.body)
-                                .italic()
-                        }
-                    }
-                    
-                    if let examples = item.examples, !examples.isEmpty {
-                        DetailSection(icon: "quote.opening", title: "EXAMPLES", color: .green) {
-                            VStack(alignment: .leading, spacing: 12) {
-                                ForEach(examples, id: \.self) { example in
-                                    HStack(alignment: .top, spacing: 12) {
-                                        Capsule()
-                                            .fill(Color.green.opacity(0.5))
-                                            .frame(width: 3)
-                                            .padding(.vertical, 2)
-                                        Text(example)
-                                            .italic()
-                                            .foregroundStyle(.secondary)
+                        
+                        if let examples = item.examples, !examples.isEmpty {
+                            DetailSection(icon: "quote.opening", title: "EXAMPLES", color: .green) {
+                                VStack(alignment: .leading, spacing: 16) {
+                                    ForEach(examples, id: \.self) { example in
+                                        HStack(alignment: .top, spacing: 12) {
+                                            Capsule()
+                                                .fill(Color.green.opacity(0.5))
+                                                .frame(width: 4)
+                                                .padding(.vertical, 2)
+                                            Text(example)
+                                                .italic()
+                                                .foregroundStyle(.secondary)
+                                                .lineSpacing(4)
+                                        }
                                     }
                                 }
                             }
                         }
-                    }
-                    
-                    if let family = item.word_family, !family.isEmpty {
-                        DetailSection(icon: "person.3.sequence.fill", title: "WORD FAMILY", color: .orange) {
-                            VStack(alignment: .leading, spacing: 8) {
-                                ForEach(family, id: \.self) { word in
-                                    HStack {
-                                        Image(systemName: "circle.fill")
-                                            .font(.system(size: 6))
-                                            .foregroundStyle(.orange.opacity(0.5))
+                        
+                        if let family = item.word_family, !family.isEmpty {
+                            DetailSection(icon: "person.3.sequence.fill", title: "WORD FAMILY", color: .orange) {
+                                FlowLayout(spacing: 8) {
+                                    ForEach(family, id: \.self) { word in
                                         Text(word)
-                                            .foregroundStyle(.primary)
+                                            .font(.subheadline)
+                                            .padding(.horizontal, 12)
+                                            .padding(.vertical, 6)
+                                            .background(Color.orange.opacity(0.1))
+                                            .foregroundStyle(.orange)
+                                            .clipShape(Capsule())
                                     }
                                 }
                             }
                         }
-                    }
-                    
-                    if let colls = item.collocations, !colls.isEmpty {
-                        DetailSection(icon: "link", title: "COLLOCATIONS", color: .purple) {
-                            VStack(alignment: .leading, spacing: 8) {
-                                ForEach(colls, id: \.self) { coll in
-                                    HStack {
-                                        Image(systemName: "circle.fill")
-                                            .font(.system(size: 6))
-                                            .foregroundStyle(.purple.opacity(0.5))
+                        
+                        if let colls = item.collocations, !colls.isEmpty {
+                            DetailSection(icon: "link", title: "COLLOCATIONS", color: .purple) {
+                                FlowLayout(spacing: 8) {
+                                    ForEach(colls, id: \.self) { coll in
                                         Text(coll)
-                                            .foregroundStyle(.primary)
+                                            .font(.subheadline)
+                                            .padding(.horizontal, 12)
+                                            .padding(.vertical, 6)
+                                            .background(Color.purple.opacity(0.1))
+                                            .foregroundStyle(.purple)
+                                            .clipShape(Capsule())
                                     }
                                 }
                             }
                         }
-                    }
-                    
-                    if let extra = item.extra_content {
-                         DetailSection(icon: "doc.text", title: "NOTES", color: .gray) {
-                            Text(extra)
+                        
+                        if let extra = item.extra_content {
+                             DetailSection(icon: "doc.text", title: "NOTES", color: .gray) {
+                                Text(extra)
+                                    .lineSpacing(4)
+                            }
                         }
-                    }
-                    
-                    // Delete button at bottom
-                    Button(role: .destructive) {
-                        showDeleteAlert = true
-                    } label: {
-                        HStack {
-                            Image(systemName: "trash.fill")
-                            Text("Delete Word")
-                                .fontWeight(.semibold)
+                        
+                        // Delete button at bottom
+                        Button(role: .destructive) {
+                            showDeleteAlert = true
+                        } label: {
+                            HStack {
+                                Image(systemName: "trash.fill")
+                                Text("Delete Word")
+                                    .fontWeight(.semibold)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.red.opacity(0.1))
+                            .foregroundStyle(.red)
+                            .clipShape(RoundedRectangle(cornerRadius: 16))
                         }
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.red.opacity(0.1))
-                        .foregroundStyle(.red)
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .padding(.top, 20)
+                        .padding(.bottom, 40)
                     }
-                    .padding(.top, 20)
+                    .padding(20)
                 }
-                .padding(24)
             }
-            .background(Color(.systemBackground))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
+                    Button {
                         dismiss()
+                    } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.title2)
+                            .foregroundStyle(.secondary)
                     }
                 }
             }
@@ -446,12 +478,14 @@ struct DetailSection<Content: View>: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            HStack(spacing: 8) {
+            HStack(spacing: 12) {
                 Image(systemName: icon)
-                    .foregroundStyle(color)
-                    .padding(8)
-                    .background(color.opacity(0.1))
+                    .font(.headline)
+                    .foregroundStyle(.white)
+                    .frame(width: 32, height: 32)
+                    .background(color)
                     .clipShape(Circle())
+                    .shadow(color: color.opacity(0.3), radius: 4)
                 
                 Text(title)
                     .font(.caption)
@@ -462,10 +496,75 @@ struct DetailSection<Content: View>: View {
             
             content()
         }
-        .padding()
+        .padding(20)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color(.secondarySystemBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .background(Color(.systemBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 20))
+        .shadow(color: Color.black.opacity(0.03), radius: 5, x: 0, y: 2)
+    }
+}
+
+// Simple FlowLayout helper
+struct FlowLayout: Layout {
+    var spacing: CGFloat = 8
+    
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        let rows = computeRows(proposal: proposal, subviews: subviews)
+        let height = rows.last?.maxY ?? 0
+        return CGSize(width: proposal.width ?? 0, height: height)
+    }
+    
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        let rows = computeRows(proposal: proposal, subviews: subviews)
+        for row in rows {
+            for element in row.elements {
+                element.subview.place(at: CGPoint(x: bounds.minX + element.x, y: bounds.minY + element.y), proposal: proposal)
+            }
+        }
+    }
+    
+    struct Row {
+        var elements: [Element] = []
+        var maxY: CGFloat = 0
+    }
+    
+    struct Element {
+        var subview: LayoutSubview
+        var x: CGFloat
+        var y: CGFloat
+    }
+    
+    func computeRows(proposal: ProposedViewSize, subviews: Subviews) -> [Row] {
+        var rows: [Row] = []
+        var currentX: CGFloat = 0
+        var currentY: CGFloat = 0
+        var currentRowHeight: CGFloat = 0
+        var currentRowElements: [Element] = []
+        
+        let maxWidth = proposal.width ?? 0
+        
+        for subview in subviews {
+            let size = subview.sizeThatFits(.unspecified)
+            
+            if currentX + size.width > maxWidth {
+                // New row
+                rows.append(Row(elements: currentRowElements, maxY: currentY + currentRowHeight))
+                currentY += currentRowHeight + spacing
+                currentX = 0
+                currentRowHeight = 0
+                currentRowElements = []
+            }
+            
+            currentRowElements.append(Element(subview: subview, x: currentX, y: currentY))
+            currentX += size.width + spacing
+            currentRowHeight = max(currentRowHeight, size.height)
+        }
+        
+        if !currentRowElements.isEmpty {
+            rows.append(Row(elements: currentRowElements, maxY: currentY + currentRowHeight))
+        }
+        
+        return rows
     }
 }
 

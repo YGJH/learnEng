@@ -162,10 +162,14 @@ struct WritingView: View {
                 Do not include any introductory text like "Here is an essay...", just start with the title or the essay itself.
                 """
                 
-                let response = try await writingSession.respond(to: prompt)
+                // Use Streaming Response
+                for try await chunk in streamResponse(prompt: prompt, session: writingSession) {
+                    await MainActor.run {
+                        self.generatedEssay += chunk
+                    }
+                }
                 
                 await MainActor.run {
-                    self.generatedEssay = response.content
                     self.isGenerating = false
                 }
             } catch {

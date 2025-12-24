@@ -7,6 +7,7 @@
 
 import SwiftUI
 import FoundationModels
+import TipKit
 
 struct ChatView: View {
     @Binding var userInput: String
@@ -18,15 +19,34 @@ struct ChatView: View {
     let model: SystemLanguageModel
     let onSendMessage: () -> Void
     
+    // Tip
+    let chatTip = ChatTip()
+    
     var body: some View {
         ZStack(alignment: .bottom) {
+            // Modern Background
             Color(.systemGroupedBackground)
                 .ignoresSafeArea()
             
+            // Subtle gradient overlay
+            LinearGradient(
+                colors: [Color.blue.opacity(0.05), Color.purple.opacity(0.05)],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .ignoresSafeArea()
+            
             if model.availability == .available {
                 if chattingSession.isEmpty {
-                    EmptyChatStateView()
-                        .padding(.bottom, 80)
+                    VStack {
+                        TipView(chatTip, arrowEdge: .bottom)
+                            .padding()
+                            .background(Color.clear)
+                        
+                        EmptyChatStateView()
+                            .padding(.bottom, 80)
+                    }
+                    .padding(30)
                 }
                 
                 ScrollViewReader { proxy in
@@ -183,13 +203,25 @@ struct MessageView: View {
             HStack(alignment: .top, spacing: 12) {
                 ZStack {
                     Circle()
-                        .fill(Color.white)
+                        .fill(
+                            LinearGradient(
+                                colors: [.white, .gray.opacity(0.1)],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
                         .frame(width: 36, height: 36)
                         .shadow(color: Color.black.opacity(0.1), radius: 3, x: 0, y: 1)
                     
                     Image(systemName: "brain.head.profile")
                         .font(.system(size: 18))
-                        .foregroundColor(.accentColor)
+                        .foregroundStyle(
+                            LinearGradient(
+                                colors: [.blue, .purple],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
                 }
                 
                 VStack(alignment: .leading) {
@@ -200,7 +232,7 @@ struct MessageView: View {
                         TypingIndicator()
                             .padding(.horizontal, 16)
                             .padding(.vertical, 12)
-                            .background(Color(.secondarySystemBackground))
+                            .background(.ultraThinMaterial)
                             .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
                     } else {
                         VStack(alignment: .leading, spacing: 6) {
@@ -208,9 +240,10 @@ struct MessageView: View {
                                 .font(.body)
                                 .padding(.horizontal, 16)
                                 .padding(.vertical, 12)
-                                .background(Color(.secondarySystemBackground))
+                                .background(.ultraThinMaterial)
                                 .foregroundColor(.primary)
                                 .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+                                .shadow(color: Color.black.opacity(0.03), radius: 2, x: 0, y: 1)
                             
                             Button {
                                 SpeechSynthesizer.shared.speak(String(message.formattedReply.characters))
@@ -258,7 +291,13 @@ struct UnavailableView: View {
         VStack(spacing: 20) {
             Image(systemName: "exclamationmark.triangle.fill")
                 .font(.system(size: 60))
-                .foregroundColor(.orange)
+                .foregroundStyle(
+                    LinearGradient(
+                        colors: [.orange, .red],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
                 .shadow(color: .orange.opacity(0.3), radius: 10)
             
             VStack(spacing: 8) {
@@ -283,19 +322,31 @@ struct EmptyChatStateView: View {
         VStack(spacing: 24) {
             ZStack {
                 Circle()
-                    .fill(Color.accentColor.opacity(0.1))
-                    .frame(width: 100, height: 100)
+                    .fill(
+                        LinearGradient(
+                            colors: [Color.accentColor.opacity(0.1), Color.purple.opacity(0.1)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .frame(width: 120, height: 120)
+                    .blur(radius: 10)
                 
                 Image(systemName: "bubble.left.and.bubble.right.fill")
                     .font(.system(size: 48))
-                    .foregroundColor(.accentColor)
+                    .foregroundStyle(
+                        LinearGradient(
+                            colors: [.accentColor, .purple],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
             }
             .padding(.bottom, 8)
             
             VStack(spacing: 12) {
                 Text("Start a Conversation")
-                    .font(.title2)
-                    .fontWeight(.bold)
+                    .font(.system(size: 24, weight: .bold, design: .rounded))
                     .foregroundColor(.primary)
                 
                 Text("Type a word or phrase below to\nstart learning English.")

@@ -27,6 +27,13 @@ struct ExamView: View {
                 Color(uiColor: .systemGroupedBackground)
                     .ignoresSafeArea()
                 
+                LinearGradient(
+                    colors: [Color.blue.opacity(0.05), Color.purple.opacity(0.05)],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+                .ignoresSafeArea()
+                
                 contentView
             }
             .navigationTitle("Exam")
@@ -63,38 +70,47 @@ struct ExamView: View {
     }
     
     private var loadingView: some View {
-        VStack(spacing: 24) {
+        VStack(spacing: 32) {
             ZStack {
                 Circle()
-                    .stroke(Color.blue.opacity(0.1), lineWidth: 8)
-                    .frame(width: 80, height: 80)
+                    .stroke(Color.blue.opacity(0.1), lineWidth: 12)
+                    .frame(width: 100, height: 100)
                 
                 Circle()
                     .trim(from: 0, to: generationProgress)
-                    .stroke(Color.blue, style: StrokeStyle(lineWidth: 8, lineCap: .round))
-                    .frame(width: 80, height: 80)
+                    .stroke(
+                        LinearGradient(colors: [.blue, .purple], startPoint: .topLeading, endPoint: .bottomTrailing),
+                        style: StrokeStyle(lineWidth: 12, lineCap: .round)
+                    )
+                    .frame(width: 100, height: 100)
                     .rotationEffect(.degrees(-90))
                     .animation(.linear, value: generationProgress)
+                    .shadow(color: .blue.opacity(0.3), radius: 10)
                 
                 Image(systemName: "brain.head.profile")
-                    .font(.title)
-                    .foregroundStyle(.blue)
+                    .font(.system(size: 40))
+                    .foregroundStyle(
+                        LinearGradient(colors: [.blue, .purple], startPoint: .topLeading, endPoint: .bottomTrailing)
+                    )
             }
             
-            VStack(spacing: 8) {
+            VStack(spacing: 12) {
                 Text("Generating Exam...")
-                    .font(.headline)
+                    .font(.system(size: 24, weight: .bold, design: .rounded))
                     .foregroundStyle(.primary)
                 
                 Text("\(Int(generationProgress * 100))%")
-                    .font(.subheadline)
+                    .font(.title3)
                     .monospacedDigit()
+                    .fontWeight(.semibold)
                     .foregroundStyle(.secondary)
             }
             
             Text("Crafting questions from your vocabulary...")
-                .font(.caption)
-                .foregroundStyle(.tertiary)
+                .font(.body)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(.ultraThinMaterial)
@@ -105,25 +121,35 @@ struct ExamView: View {
         if items.isEmpty {
             ContentUnavailableView("No Vocabulary", systemImage: "book.closed", description: Text("Add some words to your vocabulary first."))
         } else {
-            VStack(spacing: 30) {
+            VStack(spacing: 40) {
                 Spacer()
                 
-                Image(systemName: "graduationcap.fill")
-                    .font(.system(size: 80))
-                    .foregroundStyle(
-                        LinearGradient(colors: [.blue, .purple], startPoint: .topLeading, endPoint: .bottomTrailing)
-                    )
-                    .shadow(color: .blue.opacity(0.3), radius: 10, x: 0, y: 10)
+                ZStack {
+                    Circle()
+                        .fill(
+                            LinearGradient(colors: [Color.blue.opacity(0.1), Color.purple.opacity(0.1)], startPoint: .topLeading, endPoint: .bottomTrailing)
+                        )
+                        .frame(width: 160, height: 160)
+                        .blur(radius: 20)
+                    
+                    Image(systemName: "graduationcap.fill")
+                        .font(.system(size: 80))
+                        .foregroundStyle(
+                            LinearGradient(colors: [.blue, .purple], startPoint: .topLeading, endPoint: .bottomTrailing)
+                        )
+                        .shadow(color: .blue.opacity(0.3), radius: 10, x: 0, y: 10)
+                }
                 
-                VStack(spacing: 12) {
+                VStack(spacing: 16) {
                     Text("Ready to Test?")
-                        .font(.title)
-                        .fontWeight(.bold)
+                        .font(.system(size: 32, weight: .bold, design: .rounded))
                     
                     Text("We'll generate a personalized exam based on your vocabulary list.")
+                        .font(.body)
                         .multilineTextAlignment(.center)
                         .foregroundStyle(.secondary)
                         .padding(.horizontal, 40)
+                        .lineSpacing(4)
                 }
                 
                 VStack(spacing: 16) {
@@ -139,9 +165,9 @@ struct ExamView: View {
                         .frame(maxWidth: .infinity)
                         .padding()
                         .background(
-                            LinearGradient(colors: [.blue, .blue.opacity(0.8)], startPoint: .top, endPoint: .bottom)
+                            LinearGradient(colors: [.blue, .purple], startPoint: .leading, endPoint: .trailing)
                         )
-                        .clipShape(RoundedRectangle(cornerRadius: 16))
+                        .clipShape(RoundedRectangle(cornerRadius: 20))
                         .shadow(color: .blue.opacity(0.3), radius: 8, x: 0, y: 4)
                     }
                     .buttonStyle(ScaleButtonStyle())
@@ -157,9 +183,13 @@ struct ExamView: View {
                         .foregroundColor(.primary)
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .background(Color(uiColor: .secondarySystemGroupedBackground))
-                        .clipShape(RoundedRectangle(cornerRadius: 16))
+                        .background(.ultraThinMaterial)
+                        .clipShape(RoundedRectangle(cornerRadius: 20))
                         .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 20)
+                                .stroke(Color.white.opacity(0.5), lineWidth: 1)
+                        )
                     }
                     .buttonStyle(ScaleButtonStyle())
                 }

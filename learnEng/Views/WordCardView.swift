@@ -1,11 +1,15 @@
 import SwiftUI
 import SwiftData
+import TipKit
 
 struct WordCardView: View {
     let card: WordCard
     let query: String
     @Environment(\.modelContext) private var modelContext
     @State private var isSaved = false
+    
+    // Tip
+    let vocabTip = VocabularyTip()
     
     func saveCard() {
         let newItem = Item(
@@ -29,6 +33,9 @@ struct WordCardView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
+            // Tip View
+            TipView(vocabTip, arrowEdge: .bottom)
+            
             // Typo Correction Notice
             if let word = card.word,
                word.lowercased().trimmingCharacters(in: .whitespaces) != query.lowercased().trimmingCharacters(in: .whitespaces) {
@@ -53,8 +60,7 @@ struct WordCardView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     HStack(alignment: .center, spacing: 8) {
                         Text(card.word ?? query)
-                            .font(.title)
-                            .fontWeight(.bold)
+                            .font(.system(size: 28, weight: .bold, design: .rounded))
                             .foregroundStyle(.primary)
                         
                         Button {
@@ -63,6 +69,7 @@ struct WordCardView: View {
                             Image(systemName: "speaker.wave.2.circle.fill")
                                 .font(.title2)
                                 .foregroundStyle(.blue)
+                                .shadow(color: .blue.opacity(0.3), radius: 4)
                         }
                     }
                     
@@ -90,28 +97,42 @@ struct WordCardView: View {
                 
                 Button(action: saveCard) {
                     HStack(spacing: 6) {
-                        Image(systemName: isSaved ? "checkmark.circle.fill" : "plus.circle.fill")
-                            .font(.title3)
+                        Image(systemName: isSaved ? "checkmark.circle.fill" : "bookmark.fill")
+                            .font(.headline)
                         if isSaved {
                             Text("Saved")
-                                .font(.callout)
-                                .fontWeight(.semibold)
+                                .font(.caption)
+                                .fontWeight(.bold)
                         } else {
                             Text("Save")
-                                .font(.callout)
-                                .fontWeight(.semibold)
+                                .font(.caption)
+                                .fontWeight(.bold)
                         }
                     }
                     .foregroundStyle(isSaved ? .green : .white)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 10)
-                    .background(isSaved ? Color.green.opacity(0.15) : Color.blue)
+                    .background(
+                        ZStack {
+                            if isSaved {
+                                Color.green.opacity(0.15)
+                            } else {
+                                LinearGradient(
+                                    colors: [.blue, .purple],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            }
+                        }
+                    )
                     .clipShape(Capsule())
+                    .shadow(color: isSaved ? .clear : .blue.opacity(0.3), radius: 5, x: 0, y: 3)
                 }
                 .disabled(isSaved)
             }
             
             Divider()
+                .background(Color.gray.opacity(0.2))
             
             // Definitions
             if let meaningEn = card.meaning_en {
@@ -119,10 +140,11 @@ struct WordCardView: View {
                     Label("Definition (EN)", systemImage: "text.book.closed")
                         .font(.caption)
                         .fontWeight(.bold)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(.blue)
                     Text(meaningEn)
                         .font(.body)
                         .foregroundStyle(.primary)
+                        .lineSpacing(4)
                 }
             }
             
@@ -131,7 +153,7 @@ struct WordCardView: View {
                     Label("Translation", systemImage: "globe")
                         .font(.caption)
                         .fontWeight(.bold)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(.red)
                     Text(translation)
                         .font(.body)
                         .foregroundStyle(.primary)
@@ -143,14 +165,19 @@ struct WordCardView: View {
                 HStack(alignment: .top, spacing: 12) {
                     Image(systemName: "lightbulb.max.fill")
                         .foregroundStyle(.yellow)
+                        .font(.title3)
                     Text(nuance)
                         .font(.callout)
                         .italic()
                         .foregroundStyle(.secondary)
                 }
-                .padding()
+                .padding(16)
                 .background(Color.yellow.opacity(0.1))
-                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .clipShape(RoundedRectangle(cornerRadius: 16))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16)
+                        .stroke(Color.yellow.opacity(0.2), lineWidth: 1)
+                )
             }
             
             // Examples
@@ -170,6 +197,7 @@ struct WordCardView: View {
                             Text(example)
                                 .font(.callout)
                                 .foregroundStyle(.secondary)
+                                .italic()
                         }
                     }
                 }
@@ -178,6 +206,7 @@ struct WordCardView: View {
             // Footer: Word Family & Collocations
             if (card.word_family?.isEmpty == false) || (card.collocations?.isEmpty == false) {
                 Divider()
+                    .background(Color.gray.opacity(0.2))
                 
                 HStack(alignment: .top, spacing: 20) {
                     if let family = card.word_family, !family.isEmpty {
@@ -218,8 +247,12 @@ struct WordCardView: View {
             }
         }
         .padding(24)
-        .background(Color(.secondarySystemBackground))
+        .background(.ultraThinMaterial)
         .clipShape(RoundedRectangle(cornerRadius: 24))
         .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 4)
+        .overlay(
+            RoundedRectangle(cornerRadius: 24)
+                .stroke(Color.white.opacity(0.5), lineWidth: 1)
+        )
     }
 }

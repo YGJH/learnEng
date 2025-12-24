@@ -5,6 +5,13 @@ struct SettingsView: View {
     @AppStorage("selectedModel") private var selectedModel: String = "local"
     @AppStorage("translationLanguage") private var translationLanguage: String = "zh-TW"
     
+    // New Settings for UI Components Requirement
+    @AppStorage("speechRate") private var speechRate: Double = 0.5
+    @AppStorage("dailyGoal") private var dailyGoal: Int = 5
+    @AppStorage("themeColor") private var themeColor: String = "blue" // Storing as string for simplicity
+    @State private var reminderTime = Date()
+    @State private var themeColorSelection: Color = .blue
+    
     let models = [
         "local": "Local Model (On-Device)",
         "gemini-2.5-flash": "Gemini 2.5 Flash",
@@ -48,6 +55,29 @@ struct SettingsView: View {
                         }
                     }
                     .pickerStyle(.navigationLink)
+                }
+                
+                Section(header: Text("Preferences")) {
+                    // Slider
+                    VStack(alignment: .leading) {
+                        Text("Speech Rate: \(String(format: "%.1f", speechRate))")
+                        Slider(value: $speechRate, in: 0.1...1.0, step: 0.1) {
+                            Text("Speech Rate")
+                        } minimumValueLabel: {
+                            Image(systemName: "tortoise")
+                        } maximumValueLabel: {
+                            Image(systemName: "hare")
+                        }
+                    }
+                    
+                    // Stepper
+                    Stepper("Daily Word Goal: \(dailyGoal)", value: $dailyGoal, in: 1...50)
+                    
+                    // ColorPicker
+                    ColorPicker("Theme Accent", selection: $themeColorSelection)
+                    
+                    // DatePicker
+                    DatePicker("Study Reminder", selection: $reminderTime, displayedComponents: .hourAndMinute)
                 }
                 
                 if selectedModel.contains("gemini") {
