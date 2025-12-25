@@ -3,6 +3,14 @@
   "category": "all",
   "articles": [
     {
+      "title": "How to Set Up a Smartphone for Elderly Loved Ones",
+      "link": "https://www.wired.com/story/how-to-set-up-smartphone-for-parents-grandparents/",
+      "summary": "Here's how to make iPhone and Android devices a little easier to use.",
+      "source": "WIRED",
+      "published_at": "Thu, 25 Dec 2025 12:30:00 +0000",
+      "category": "technology"
+    },
+    {
       "title": "The Gloves Are Off in the Fight for Your Right to Repair",
       "link": "https://www.wired.com/story/expired-tired-wired-right-to-repair/",
       "summary": "This year, the right-to-repair movement got a boost from—surprisingly—big tech, tariffs, and economic downturn. But the companies controlling who fixes their stuff aren’t giving up that power willingly.",
@@ -392,14 +400,6 @@
       "summary": "These portable heaters will heat a room quickly, quietly, and safely.",
       "source": "WIRED",
       "published_at": "Sun, 21 Dec 2025 11:31:00 +0000",
-      "category": "technology"
-    },
-    {
-      "title": "What Is Lossless Audio, and Do You Really Need It?",
-      "link": "https://www.wired.com/story/what-is-lossless-audio-and-do-you-really-need-it/",
-      "summary": "Lossless audio is the first step toward audio nirvana. But what is it, does it really make a difference, and how can you get it? Here’s what to know.",
-      "source": "WIRED",
-      "published_at": "Sun, 21 Dec 2025 11:00:00 +0000",
       "category": "technology"
     },
     {
@@ -803,5 +803,5 @@
       "category": "technology"
     }
   ],
-  "fetched_at": "2025-12-25T20:34:02.675859"
+  "fetched_at": "2025-12-25T20:34:13.377903"
 }
