@@ -3,6 +3,14 @@
   "category": "all",
   "articles": [
     {
+      "title": "How a $200 Fake Fireplace From Home Depot Soothed My Soul",
+      "link": "https://www.wired.com/story/turbro-suburbs-fireplace-rave-2025/",
+      "summary": "Research shows that watching a simulated fire may have real psychological benefits.",
+      "source": "WIRED",
+      "published_at": "Thu, 25 Dec 2025 10:33:00 +0000",
+      "category": "technology"
+    },
+    {
       "title": "‘Wolf DNA’ Lurks in Many Modern Dog Breeds",
       "link": "https://www.wired.com/story/wolf-dna-lurks-in-many-modern-dog-breeds/",
       "summary": "Although wolf-canine interbreeding has been considered extremely rare, the latest research shows that many present-day canines carry a small amount of wolf genes.",
@@ -392,14 +400,6 @@
       "summary": "Plant parents don’t always want another plant—up your gift-giving game with these favorite plant presents we've tested.",
       "source": "WIRED",
       "published_at": "Sat, 20 Dec 2025 13:30:00 +0000",
-      "category": "technology"
-    },
-    {
-      "title": "Best Nintendo Switch 2 Controllers (2025), Tested and Reviewed",
-      "link": "https://www.wired.com/gallery/best-nintendo-switch-2-controllers/",
-      "summary": "Get a grip on gaming with the best controller options for Nintendo’s latest handheld console.",
-      "source": "WIRED",
-      "published_at": "Sat, 20 Dec 2025 13:00:00 +0000",
       "category": "technology"
     },
     {
@@ -803,5 +803,5 @@
       "category": "technology"
     }
   ],
-  "fetched_at": "2025-12-25T18:36:06.780139"
+  "fetched_at": "2025-12-25T18:36:17.790299"
 }
