@@ -1,0 +1,7 @@
+#!/bin/zsh
+cd /home/charles/Documents/learnEng/exp
+/home/charles/.local/bin/uv run main.py
+cd ..
+git add .
+git commit -m "update"
+git push
