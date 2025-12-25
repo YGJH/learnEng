@@ -127,7 +127,7 @@ def get_cached_news():
             detail="No cached news found. Please call /news to fetch fresh data."
         )
 
-@app.get("/news")
+#@app.get("/news")
 def get_all_news(category: Optional[str] = None, limit: int = 100, use_cache: bool = False):
     """
     獲取新聞的 Endpoint
@@ -210,5 +210,6 @@ def get_all_news(category: Optional[str] = None, limit: int = 100, use_cache: bo
 
 if __name__ == "__main__":
     # 方便直接用 python news_api.py 執行
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+  #  import uvicorn
+    get_all_news()
+ #   uvicorn.run(app, host="0.0.0.0", port=9902)
