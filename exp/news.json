@@ -3,6 +3,14 @@
   "category": "all",
   "articles": [
     {
+      "title": "Sealy Promo Code: Save $200 on Mattresses This Month",
+      "link": "https://www.wired.com/story/sealy-promo-code/",
+      "summary": "Whether you’re switching from springs to memory foam or just want to sleep cooler this summer, these Sealy mattress deals will have you waking up refreshed—and with cash left in your wallet.",
+      "source": "WIRED",
+      "published_at": "Thu, 25 Dec 2025 06:10:00 +0000",
+      "category": "technology"
+    },
+    {
       "title": "JBL Bar 500MK2 Review: A Fantastic Soundbar System",
       "link": "https://www.wired.com/review/jbl-bar-500-mk2/",
       "summary": "This compact 2.1 soundbar system offers realistic Dolby Atmos surround sound.",
@@ -390,14 +398,6 @@
       "title": "The 48 Best Movies on Netflix, WIRED’s Picks (December 2025)",
       "link": "https://www.wired.com/story/netflix-best-movies-this-week/",
       "summary": "Wake Up Dead Man: A Knives Out Mystery, Frankenstein, and Klaus are just a few of the movies you should watch on Netflix this month.",
-      "source": "WIRED",
-      "published_at": "Sat, 20 Dec 2025 12:00:00 +0000",
-      "category": "technology"
-    },
-    {
-      "title": "Trump’s Agriculture Bailout Is Alienating His MAHA Base",
-      "link": "https://www.wired.com/story/trumps-agriculture-bailout-is-alienating-his-maha-base/",
-      "summary": "The administration’s pro-industry tilt—across three executive agencies—is feeding the MAHA movement’s growing discontent.",
       "source": "WIRED",
       "published_at": "Sat, 20 Dec 2025 12:00:00 +0000",
       "category": "technology"
@@ -803,5 +803,5 @@
       "category": "technology"
     }
   ],
-  "fetched_at": "2025-12-25T14:14:26.743169"
+  "fetched_at": "2025-12-25T14:14:37.397947"
 }
