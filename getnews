@@ -1,7 +1,9 @@
 #!/bin/zsh
+set -euo pipefail
+
 cd /home/charles/Documents/learnEng/exp
 /home/charles/.local/bin/uv run main.py
-cd ..
+cd /home/charles/Documents/learnEng
 git add .
 git commit -m "update"
 git push
