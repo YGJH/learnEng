@@ -3,6 +3,14 @@
   "category": "all",
   "articles": [
     {
+      "title": "The 40 Best Movies on HBO Max Right Now (January 2026)",
+      "link": "https://www.wired.com/story/best-movies-hbo-max-right-now/",
+      "summary": "One Battle After Another, Spinal Tap II: The End Continues, and It's Never Over, Jeff Buckley are just a few of the movies you should be watching on HBO Max this month.",
+      "source": "WIRED",
+      "published_at": "Thu, 25 Dec 2025 20:00:00 +0000",
+      "category": "technology"
+    },
+    {
       "title": "How to Set Up a Smartphone for Elderly Loved Ones",
       "link": "https://www.wired.com/story/how-to-set-up-smartphone-for-parents-grandparents/",
       "summary": "Here's how to make iPhone and Android devices a little easier to use.",
@@ -392,14 +400,6 @@
       "summary": "The leading approach to the simplex method, a widely used technique for balancing complex logistical constraints, can’t get any better.",
       "source": "WIRED",
       "published_at": "Sun, 21 Dec 2025 12:00:00 +0000",
-      "category": "technology"
-    },
-    {
-      "title": "8 Best Space Heaters (2025): Tested, Measured, and Mistreated",
-      "link": "https://www.wired.com/gallery/the-best-space-heaters/",
-      "summary": "These portable heaters will heat a room quickly, quietly, and safely.",
-      "source": "WIRED",
-      "published_at": "Sun, 21 Dec 2025 11:31:00 +0000",
       "category": "technology"
     },
     {
@@ -803,5 +803,5 @@
       "category": "technology"
     }
   ],
-  "fetched_at": "2025-12-26T00:35:48.017288"
+  "fetched_at": "2025-12-26T12:36:00.365179"
 }
