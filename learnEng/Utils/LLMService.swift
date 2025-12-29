@@ -621,7 +621,7 @@ func generateExam(words: [String], session: LanguageModelSession) async throws -
             let word = words[wordIndex % words.count]
             
             // Create a FRESH session for each question to avoid context accumulation
-            let examSession = LanguageModelSession()
+            let examSession = LanguageModelSession(tools: [DictionaryTool()])
             
             // Randomly choose question type to avoid repetition
             let types = ["multiple_choice", "fill_in_blank"]

@@ -504,7 +504,7 @@ struct DetailSection<Content: View>: View {
     }
 }
 
-// Simple FlowLayout helper
+// FlowLayout 
 struct FlowLayout: Layout {
     var spacing: CGFloat = 8
     

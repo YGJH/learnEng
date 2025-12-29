@@ -11,7 +11,7 @@ import FoundationModels
 //import MarkdownUI
 
 struct ContentView: View {
-    @State var user_input = ""
+    @State var user_input = "" 
     let model = SystemLanguageModel.default
     @State private var model_session = LanguageModelSession(tools: [DictionaryTool()])
     @State private var chattingSession: [ChatMessage] = []
@@ -57,8 +57,8 @@ struct ContentView: View {
             currentTask = Task {
                 do {
                     let (reply, card) = try await give_reply(input: query, session: model_session)
-                    if !Task.isCancelled {
-                        await MainActor.run {
+                    if !Task                        await MainActor.run {
+.isCancelled {
                             if let index = chattingSession.firstIndex(where: { $0.id == newMessage.id }) {
                                 chattingSession[index].reply = reply
                                 chattingSession[index].card = card
