@@ -27,17 +27,17 @@
       "category": "technology"
     },
     {
-      "title": "Tips for Keeping a Digital Diary and Why You Should",
-      "link": "https://www.wired.com/story/tips-for-keeping-a-digital-diary/",
-      "summary": "After 10 years of journaling, my only regret is not starting sooner.",
+      "title": "The Great Big Power Play",
+      "link": "https://www.wired.com/story/expired-tired-wired-nuclear-plants/",
+      "summary": "US support for nuclear energy is soaring. Meanwhile, coal plants are on their way out and electricity-sucking data centers are meeting huge pushback. Welcome to the next front in the energy battle.",
       "source": "WIRED",
       "published_at": "Tue, 30 Dec 2025 11:00:00 +0000",
       "category": "technology"
     },
     {
-      "title": "The Great Big Power Play",
-      "link": "https://www.wired.com/story/expired-tired-wired-nuclear-plants/",
-      "summary": "US support for nuclear energy is soaring. Meanwhile, coal plants are on their way out and electricity-sucking data centers are meeting huge pushback. Welcome to the next front in the energy battle.",
+      "title": "Tips for Keeping a Digital Diary and Why You Should",
+      "link": "https://www.wired.com/story/tips-for-keeping-a-digital-diary/",
+      "summary": "After 10 years of journaling, my only regret is not starting sooner.",
       "source": "WIRED",
       "published_at": "Tue, 30 Dec 2025 11:00:00 +0000",
       "category": "technology"
@@ -403,6 +403,14 @@
       "category": "technology"
     },
     {
+      "title": "Meta buys Chinese-founded AI start-up Manus",
+      "link": "https://www.bbc.com/news/articles/ce3k11q9qe1o?at_medium=RSS&at_campaign=rss",
+      "summary": "The tech giant wants to build into its own AI tools which do complex things with minimal interaction.",
+      "source": "BBC News",
+      "published_at": "Tue, 30 Dec 2025 17:30:36 GMT",
+      "category": "technology"
+    },
+    {
       "title": "China to crack down on AI firms to protect kids",
       "link": "https://www.bbc.com/news/articles/c8dydlmenvro?at_medium=RSS&at_campaign=rss",
       "summary": "The draft regulations are aimed to address concerns around chatbots, which have surged in popularity in recent months.",
@@ -491,19 +499,19 @@
       "category": "technology"
     },
     {
-      "title": "£100 contactless card limit to be lifted",
-      "link": "https://www.bbc.com/news/articles/cx2prjr4lpko?at_medium=RSS&at_campaign=rss",
-      "summary": "Card providers can decide whether to offer unlimited payments on contactless cards.",
-      "source": "BBC News",
-      "published_at": "Fri, 19 Dec 2025 15:59:19 GMT",
-      "category": "technology"
-    },
-    {
       "title": "One in three using AI for emotional support and conversation, UK says",
       "link": "https://www.bbc.com/news/articles/cd6xl3ql3v0o?at_medium=RSS&at_campaign=rss",
       "summary": "The Artificial Intelligence Security Institute (AISI) says the tech is being used by one in 25 people daily.",
       "source": "BBC News",
       "published_at": "Thu, 18 Dec 2025 12:37:46 GMT",
+      "category": "technology"
+    },
+    {
+      "title": "£100 contactless card limit to be lifted",
+      "link": "https://www.bbc.com/news/articles/cx2prjr4lpko?at_medium=RSS&at_campaign=rss",
+      "summary": "Card providers can decide whether to offer unlimited payments on contactless cards.",
+      "source": "BBC News",
+      "published_at": "Fri, 19 Dec 2025 15:59:19 GMT",
       "category": "technology"
     },
     {
@@ -651,22 +659,6 @@
       "category": "technology"
     },
     {
-      "title": "'Architects of AI' named Time Magazine's Person of the Year",
-      "link": "https://www.bbc.com/news/articles/cly01mdm577o?at_medium=RSS&at_campaign=rss",
-      "summary": "Nvidia boss Jensen Huang is among the influential tech figures that adorn one of the two covers.",
-      "source": "BBC News",
-      "published_at": "Thu, 11 Dec 2025 13:52:11 GMT",
-      "category": "technology"
-    },
-    {
-      "title": "Porn company starts new age checks after £1m Ofcom fine",
-      "link": "https://www.bbc.com/news/articles/c0mpx9yn831o?at_medium=RSS&at_campaign=rss",
-      "summary": "The media regulator Ofcom said AVS Group Ltd had started age checks on some of its porn websites.",
-      "source": "BBC News",
-      "published_at": "Wed, 10 Dec 2025 14:05:23 GMT",
-      "category": "technology"
-    },
-    {
       "title": "Tech Life",
       "link": "https://www.bbc.co.uk/sounds/play/w3ct6zpv?at_medium=RSS&at_campaign=rss",
       "summary": "A study found AI chatbots can persuade us with fake facts. How does this affect politics?",
@@ -801,7 +793,15 @@
       "source": "BBC News",
       "published_at": "Sat, 15 Nov 2025 04:03:27 GMT",
       "category": "technology"
+    },
+    {
+      "title": "Call of Duty is back, and it's got a battle on its hands",
+      "link": "https://www.bbc.com/news/articles/cy9pwgqvr7go?at_medium=RSS&at_campaign=rss",
+      "summary": "The annual instalment of the massive series faces new challenges from competitor Battlefield 6.",
+      "source": "BBC News",
+      "published_at": "Fri, 14 Nov 2025 15:47:29 GMT",
+      "category": "technology"
     }
   ],
-  "fetched_at": "2025-12-31T01:28:04.705041"
+  "fetched_at": "2025-12-31T13:27:59.569863"
 }
