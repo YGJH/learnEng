@@ -1,5 +1,6 @@
 import SwiftUI
 import FoundationModels
+import NaturalLanguage
 
 struct WritingView: View {
     @State private var topic: String = ""
@@ -102,13 +103,27 @@ struct WritingView: View {
                                                 .foregroundStyle(.primary)
                                                 .lineSpacing(4)
                                             
-                                            Text(item.translation)
-                                                .font(.body)
-                                                .foregroundStyle(.secondary)
+                                            if let translation = item.translation {
+                                                Text(translation)
+                                                    .font(.body)
+                                                    .foregroundStyle(.secondary)
+                                                    .padding(10)
+                                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                                    .background(Color.blue.opacity(0.05))
+                                                    .cornerRadius(8)
+                                            } else {
+                                                HStack {
+                                                    ProgressView()
+                                                        .scaleEffect(0.8)
+                                                    Text("Translating...")
+                                                        .font(.caption)
+                                                        .foregroundStyle(.secondary)
+                                                }
                                                 .padding(10)
                                                 .frame(maxWidth: .infinity, alignment: .leading)
-                                                .background(Color.blue.opacity(0.05))
+                                                .background(Color.gray.opacity(0.1))
                                                 .cornerRadius(8)
+                                            }
                                         }
                                         .padding(.bottom, 8)
                                         Divider()
@@ -190,38 +205,79 @@ struct WritingView: View {
         
         Task {
             do {
-                // Split essay into sentences (simple splitting by period/newline)
-                // A more robust NLP splitter would be better, but this works for basic needs
-                let sentences = generatedEssay
-                    .components(separatedBy: .newlines)
-                    .flatMap { $0.components(separatedBy: ". ") }
-                    .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
-                    .filter { !$0.isEmpty }
-                    .map { $0.hasSuffix(".") ? $0 : $0 + "." } // Re-add period if lost
+                // 1. Robust Sentence Splitting using NaturalLanguage
+                let tokenizer = NLTokenizer(unit: .sentence)
+                tokenizer.string = generatedEssay
+                let sentences = tokenizer.tokens(for: generatedEssay.startIndex..<generatedEssay.endIndex).map { String(generatedEssay[$0]) }
                 
-                var results: [TranslatedSentence] = []
+                // 2. Initialize UI with placeholders (nil translation)
+                await MainActor.run {
+                    self.translatedSentences = sentences.map { TranslatedSentence(original: $0, translation: nil) }
+                    self.showTranslation = true
+                }
                 
-                // Translate batch or one by one. 
-                // To avoid context window issues with very long essays, we can translate sentence by sentence 
-                // or paragraph by paragraph. Here we do it one by one for precision.
+                // 3. Batch Processing
+                let batchSize = 5
+                let batches = sentences.chunked(into: batchSize)
+                var currentIndex = 0
                 
-                for sentence in sentences {
+                for batch in batches {
+                    // Construct prompt for the batch
+                    // We ask for a JSON array to ensure we can parse multiple translations back correctly.
+                    let batchText = batch.enumerated().map { "\($0.offset + 1). \($0.element)" }.joined(separator: "\n")
                     let prompt = """
-                    Translate the following English sentence into Traditional Chinese (繁體中文).
-                    Only provide the translation, no other text.
+                    Translate the following numbered English sentences into Traditional Chinese (繁體中文).
+                    Return the translations as a JSON array of strings, maintaining the order.
+                    Example output: ["翻譯1", "翻譯2"]
                     
-                    Sentence: "\(sentence)"
+                    Sentences:
+                    \(batchText)
                     """
                     
                     let response = try await translationSession.respond(to: prompt)
-                    let translation = response.content.trimmingCharacters(in: .whitespacesAndNewlines)
                     
-                    results.append(TranslatedSentence(original: sentence, translation: translation))
+                    // Parse Response
+                    // Try to find JSON array in the response
+                    var translatedBatch: [String] = []
+                    
+                    if let data = response.content.data(using: .utf8) {
+                        // Try to parse directly first
+                        if let jsonArray = try? JSONDecoder().decode([String].self, from: data) {
+                            translatedBatch = jsonArray
+                        } else {
+                            // Fallback: Try to extract JSON from markdown code blocks if present
+                            let pattern = "```json\\s*(\\[.*?\\])\\s*```"
+                            if let regex = try? NSRegularExpression(pattern: pattern, options: .dotMatchesLineSeparators),
+                               let match = regex.firstMatch(in: response.content, range: NSRange(response.content.startIndex..., in: response.content)),
+                               let range = Range(match.range(at: 1), in: response.content),
+                               let jsonData = String(response.content[range]).data(using: .utf8),
+                               let jsonArray = try? JSONDecoder().decode([String].self, from: jsonData) {
+                                translatedBatch = jsonArray
+                            } else {
+                                // Fallback 2: If JSON fails, try to split by newlines if it looks like a list
+                                // This is a last resort and might be less accurate
+                                translatedBatch = response.content.components(separatedBy: .newlines)
+                                    .filter { !$0.trimmingCharacters(in: .whitespaces).isEmpty }
+                                    // Remove numbering if present (e.g. "1. 翻譯")
+                                    .map { $0.replacingOccurrences(of: "^\\d+\\.\\s*", with: "", options: .regularExpression) }
+                            }
+                        }
+                    }
+                    
+                    // Update UI with results
+                    await MainActor.run {
+                        for (offset, translation) in translatedBatch.enumerated() {
+                            let globalIndex = currentIndex + offset
+                            if globalIndex < self.translatedSentences.count {
+                                self.translatedSentences[globalIndex].translation = translation
+                            }
+                        }
+                    }
+                    
+                    currentIndex += batch.count
                 }
                 
                 await MainActor.run {
-                    self.translatedSentences = results
-                    self.showTranslation = true
                     self.isTranslating = false
                 }
             } catch {
@@ -238,5 +294,13 @@ struct WritingView: View {
 struct TranslatedSentence: Identifiable {
     let id = UUID()
     let original: String
-    let translation: String
+    var translation: String?
+}
+
+extension Array {
+    func chunked(into size: Int) -> [[Element]] {
+        return stride(from: 0, to: count, by: size).map {
+            Array(self[$0 ..< Swift.min($0 + size, count)])
+        }
+    }
 }

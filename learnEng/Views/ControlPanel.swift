@@ -41,10 +41,6 @@ struct ControlPanel: View {
                             .font(.title3)
                             .foregroundStyle(.secondary)
                             .padding(8)
-                            .background(
-                                Circle()
-                                    .fill(.white.opacity(0.2))
-                            )
                     }
                     
                     VStack(alignment: .leading, spacing: 4) {
