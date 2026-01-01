@@ -147,14 +147,6 @@
       "category": "technology"
     },
     {
-      "title": "3 New Tricks to Try With Google Gemini Live After Its Latest Major Upgrade",
-      "link": "https://www.wired.com/story/3-tricks-google-gemini-live-latest-major-upgrade/",
-      "summary": "Google's AI is now even smarter, and more versatile.",
-      "source": "WIRED",
-      "published_at": "Mon, 29 Dec 2025 11:00:00 +0000",
-      "category": "technology"
-    },
-    {
       "title": "The New Surveillance State Is You",
       "link": "https://www.wired.com/story/expired-tired-wired-surveillance-state/",
       "summary": "Privacy may be dead, but civilians are turning conventional wisdom on its head by surveilling the cops as much as the cops surveil them.",
@@ -163,9 +155,17 @@
       "category": "technology"
     },
     {
+      "title": "3 New Tricks to Try With Google Gemini Live After Its Latest Major Upgrade",
+      "link": "https://www.wired.com/story/3-tricks-google-gemini-live-latest-major-upgrade/",
+      "summary": "Google's AI is now even smarter, and more versatile.",
+      "source": "WIRED",
+      "published_at": "Mon, 29 Dec 2025 11:00:00 +0000",
+      "category": "technology"
+    },
+    {
       "title": "The Most Dangerous People on the Internet in 2025",
       "link": "https://www.wired.com/story/most-dangerous-people-on-the-internet-2025/",
-      "summary": "From Donald Trump to DOGE to Chinese hackers, this year the internet's chaos caused outsized real-world harm.",
+      "summary": "From Donald Trump to DOGE to Chinese hackers, this year the internet’s chaos caused outsize real-world harm.",
       "source": "WIRED",
       "published_at": "Mon, 29 Dec 2025 10:30:00 +0000",
       "category": "technology"
@@ -803,5 +803,5 @@
       "category": "technology"
     }
   ],
-  "fetched_at": "2026-01-01T01:28:06.547068"
+  "fetched_at": "2026-01-01T13:28:11.215094"
 }
