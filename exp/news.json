@@ -35,7 +35,7 @@
       "category": "technology"
     },
     {
-      "title": "Here's How Long You Should Walk Every Day to Prevent Back Pain",
+      "title": "Here’s How Long You Should Walk Every Day to Prevent Back Pain",
       "link": "https://www.wired.com/story/heres-how-long-you-should-walk-every-day-to-prevent-back-pain/",
       "summary": "Back pain is one of the most common chronic diseases in the world. Recent research reveals how much time you should spend walking on a daily basis to prevent it.",
       "source": "WIRED",
@@ -53,7 +53,7 @@
     {
       "title": "You Can Track Plenty of Fitness Stats With Just Your Phone—No Wearables Required",
       "link": "https://www.wired.com/story/track-fitness-stats-with-just-your-phone/",
-      "summary": "You can log your steps, track your sleep, and measure your progress toward your goals using your phone alone.",
+      "summary": "Log your steps, track your sleep, and measure your progress toward your goals using your phone alone.",
       "source": "WIRED",
       "published_at": "Fri, 02 Jan 2026 10:30:00 +0000",
       "category": "technology"
@@ -147,7 +147,7 @@
       "category": "technology"
     },
     {
-      "title": "10 Tech Cleanup Tasks for New Year's Day",
+      "title": "10 Tech Cleanup Tasks for New Year’s Day",
       "link": "https://www.wired.com/story/10-tech-cleanup-tasks-for-new-years-day/",
       "summary": "Knock out these simple chores on this day of fresh starts to keep you and your devices humming smoothly.",
       "source": "WIRED",
@@ -291,17 +291,17 @@
       "category": "technology"
     },
     {
-      "title": "Tips for Keeping a Digital Diary and Why You Should",
-      "link": "https://www.wired.com/story/tips-for-keeping-a-digital-diary/",
-      "summary": "After 10 years of journaling, my only regret is not starting sooner.",
+      "title": "The Great Big Power Play",
+      "link": "https://www.wired.com/story/expired-tired-wired-nuclear-plants/",
+      "summary": "US support for nuclear energy is soaring. Meanwhile, coal plants are on their way out and electricity-sucking data centers are meeting huge pushback. Welcome to the next front in the energy battle.",
       "source": "WIRED",
       "published_at": "Tue, 30 Dec 2025 11:00:00 +0000",
       "category": "technology"
     },
     {
-      "title": "The Great Big Power Play",
-      "link": "https://www.wired.com/story/expired-tired-wired-nuclear-plants/",
-      "summary": "US support for nuclear energy is soaring. Meanwhile, coal plants are on their way out and electricity-sucking data centers are meeting huge pushback. Welcome to the next front in the energy battle.",
+      "title": "Tips for Keeping a Digital Diary and Why You Should",
+      "link": "https://www.wired.com/story/tips-for-keeping-a-digital-diary/",
+      "summary": "After 10 years of journaling, my only regret is not starting sooner.",
       "source": "WIRED",
       "published_at": "Tue, 30 Dec 2025 11:00:00 +0000",
       "category": "technology"
@@ -403,7 +403,15 @@
       "category": "technology"
     },
     {
-      "title": "Elon Musk's Grok AI alters images of women to digitally remove their clothes",
+      "title": "AI teachers and cybernetics - what could the world look like in 2050?",
+      "link": "https://www.bbc.com/news/articles/c865n800d5jo?at_medium=RSS&at_campaign=rss",
+      "summary": "We asked several experts to predict the technology we'll be using by 2050",
+      "source": "BBC News",
+      "published_at": "Fri, 02 Jan 2026 22:15:48 GMT",
+      "category": "technology"
+    },
+    {
+      "title": "Woman felt 'dehumanised' after Musk's Grok AI used to digitally remove her clothes",
       "link": "https://www.bbc.com/news/articles/c98p1r4e6m8o?at_medium=RSS&at_campaign=rss",
       "summary": "The BBC has seen several examples of it undressing women and putting them in sexual situations without their consent.",
       "source": "BBC News",
@@ -427,6 +435,14 @@
       "category": "technology"
     },
     {
+      "title": "Meta buys Chinese-founded AI start-up Manus",
+      "link": "https://www.bbc.com/news/articles/ce3k11q9qe1o?at_medium=RSS&at_campaign=rss",
+      "summary": "The tech giant wants to build into its own AI tools which do complex things with minimal interaction.",
+      "source": "BBC News",
+      "published_at": "Tue, 30 Dec 2025 17:30:36 GMT",
+      "category": "technology"
+    },
+    {
       "title": "How the defence sector is battling a skills crisis",
       "link": "https://www.bbc.com/news/articles/clyd1lpp1lyo?at_medium=RSS&at_campaign=rss",
       "summary": "Attracting younger workers into the defence industry can be challenging.",
@@ -440,14 +456,6 @@
       "summary": "The move is designed to ensure people pay all relevant tax on buying and selling crypto.",
       "source": "BBC News",
       "published_at": "Thu, 01 Jan 2026 09:52:20 GMT",
-      "category": "technology"
-    },
-    {
-      "title": "Meta buys Chinese-founded AI start-up Manus",
-      "link": "https://www.bbc.com/news/articles/ce3k11q9qe1o?at_medium=RSS&at_campaign=rss",
-      "summary": "The tech giant wants to build into its own AI tools which do complex things with minimal interaction.",
-      "source": "BBC News",
-      "published_at": "Tue, 30 Dec 2025 17:30:36 GMT",
       "category": "technology"
     },
     {
@@ -793,15 +801,7 @@
       "source": "BBC News",
       "published_at": "Wed, 19 Nov 2025 00:23:14 GMT",
       "category": "technology"
-    },
-    {
-      "title": "Can technology fix fashion's sizing crisis?",
-      "link": "https://www.bbc.com/news/articles/cjekg1pd9j4o?at_medium=RSS&at_campaign=rss",
-      "summary": "The BBC looks into whether artificial intelligence (AI) can help people who struggle when clothes are oddly sized.",
-      "source": "BBC News",
-      "published_at": "Sat, 15 Nov 2025 04:03:27 GMT",
-      "category": "technology"
     }
   ],
-  "fetched_at": "2026-01-03T01:28:06.013166"
+  "fetched_at": "2026-01-03T13:28:04.224688"
 }
