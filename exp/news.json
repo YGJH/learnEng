@@ -3,6 +3,22 @@
   "category": "all",
   "articles": [
     {
+      "title": "What Happens Next in Venezuela—and the Rest of Latin America?",
+      "link": "https://www.wired.com/story/what-happens-next-in-venezuela-and-the-rest-of-latin-america/",
+      "summary": "Donald Trump says that Venezuela’s governance will remain in the hands of senior US officials until a “proper and judicious transition” can take place. The rest of the region is on notice.",
+      "source": "WIRED",
+      "published_at": "Sat, 03 Jan 2026 22:10:35 +0000",
+      "category": "technology"
+    },
+    {
+      "title": "Disinformation Floods Social Media After Nicolás Maduro’s Capture",
+      "link": "https://www.wired.com/story/disinformation-floods-social-media-after-nicolas-maduros-capture/",
+      "summary": "From seemingly AI-generated videos to repurposed old footage, TikTok, Instagram, and X did little to stop the onslaught of misleading posts in the wake of the US invasion of Venezuela.",
+      "source": "WIRED",
+      "published_at": "Sat, 03 Jan 2026 18:14:47 +0000",
+      "category": "technology"
+    },
+    {
       "title": "The US Invaded Venezuela and Captured Nicolás Maduro. ChatGPT Disagrees",
       "link": "https://www.wired.com/story/us-invaded-venezuela-and-captured-nicolas-maduro-chatgpt-disagrees/",
       "summary": "Some AI chatbots have a surprisingly good handle on breaking news. Others decidedly don’t.",
@@ -123,17 +139,17 @@
       "category": "technology"
     },
     {
-      "title": "Best Running Shoes, Tested and Reviewed (2026): Saucony, Nike, Hoka",
-      "link": "https://www.wired.com/gallery/best-running-shoes/",
-      "summary": "We clocked thousands of test miles to bring you the best running shoes for every pace, ability, and running goal.",
+      "title": "Welcome to the Future of Noise Canceling",
+      "link": "https://www.wired.com/story/welcome-to-the-future-of-noise-canceling/",
+      "summary": "The next generation of noise reduction is currently being developed in R&amp;D labs around the world. Take a look at what's to come.",
       "source": "WIRED",
       "published_at": "Fri, 02 Jan 2026 12:00:00 +0000",
       "category": "technology"
     },
     {
-      "title": "Welcome to the Future of Noise Canceling",
-      "link": "https://www.wired.com/story/welcome-to-the-future-of-noise-canceling/",
-      "summary": "The next generation of noise reduction is currently being developed in R&amp;D labs around the world. Take a look at what's to come.",
+      "title": "Best Running Shoes, Tested and Reviewed (2026): Saucony, Nike, Hoka",
+      "link": "https://www.wired.com/gallery/best-running-shoes/",
+      "summary": "We clocked thousands of test miles to bring you the best running shoes for every pace, ability, and running goal.",
       "source": "WIRED",
       "published_at": "Fri, 02 Jan 2026 12:00:00 +0000",
       "category": "technology"
@@ -384,22 +400,6 @@
       "summary": "The reborn Commodore 64 is an astonishing remake—but daunting if you weren’t there the first time around.",
       "source": "WIRED",
       "published_at": "Tue, 30 Dec 2025 12:30:00 +0000",
-      "category": "technology"
-    },
-    {
-      "title": "What Is a Preamp, and Do I Really Need One?",
-      "link": "https://www.wired.com/story/what-is-a-preamp-and-do-i-really-need-one/",
-      "summary": "If you’ve wondered what a preamplifier is, what it exactly does, and whether your audio setup is missing one, we’ve got the answers—as well as some of our top recommendations.",
-      "source": "WIRED",
-      "published_at": "Tue, 30 Dec 2025 12:00:00 +0000",
-      "category": "technology"
-    },
-    {
-      "title": "7 Best Digital Notebooks (2026): reMarkable, Kobo, Kindle",
-      "link": "https://www.wired.com/gallery/best-smart-notebooks-and-smart-pens/",
-      "summary": "These nifty tools combine the ease of jotting notes by hand with the power of saving them digitally.",
-      "source": "WIRED",
-      "published_at": "Tue, 30 Dec 2025 11:38:00 +0000",
       "category": "technology"
     },
     {
@@ -803,5 +803,5 @@
       "category": "technology"
     }
   ],
-  "fetched_at": "2026-01-04T01:28:11.492547"
+  "fetched_at": "2026-01-04T13:28:09.343616"
 }
